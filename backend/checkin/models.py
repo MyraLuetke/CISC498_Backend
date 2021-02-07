@@ -46,4 +46,19 @@ class User(AbstractUser):
     USERNAME_FIELD = 'email'
     REQUIRED_FIELDS = []
 
-    objects = UserManager()  ## This is the new line in the User model. ##
+    objects = UserManager()
+
+    is_customer = models.BooleanField(default=False)
+    is_business = models.BooleanField(default=False)
+
+
+class Customer(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE, primary_key=True)
+    first_name = models.CharField(max_length=100)
+    last_name = models.CharField(max_length=100)
+    phone_num = models.CharField(max_length=11)
+    created_date = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return self.first_name + ' ' + self.last_name
+
