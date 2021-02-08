@@ -1,0 +1,35 @@
+Virtualenv lets us make sure that we're all running the code in the same environment so that 
+there are no strange version issues.
+
+To install:
+pip install virtualenv
+//Navigate to the root folder (CISC498_Backend)
+virtualenv venv
+
+To activate:
+cd venv/Scripts // This is in the root folder
+//For Windows:
+activate.bat
+//For Mac:
+./activate
+
+Command line should now look something like:
+(venv) C:\Users\sammc\GitHub\CISC498\CISC498_Backend\backend>
+
+To make sure all requirements are installed:
+pip install -r requirements.txt
+
+If some package is ever not installed:
+pip install <package name>
+pip freeze
+// This should give some output such as 
+asgiref==3.3.1
+Django==3.1.5
+djangorestframework==3.12.2
+djangorestframework-simplejwt==4.6.0
+PyJWT==2.0.1
+pytz==2021.1
+sqlparse==0.4.1
+<new package>==<some version>
+
+Add the <new package> line to requirements.txt
