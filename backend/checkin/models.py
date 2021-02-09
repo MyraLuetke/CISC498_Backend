@@ -57,7 +57,7 @@ class Customer(models.Model):
     last_name = models.CharField(max_length=100)
     phone_num = models.CharField(max_length=11)
     created_date = models.DateTimeField(auto_now_add=True)
+    email_verification = models.BooleanField()
 
     def __str__(self):
         return self.first_name + ' ' + self.last_name
-
