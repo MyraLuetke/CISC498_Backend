@@ -131,3 +131,4 @@ dmypy.json
 .vscode
 .idea
 backend/checkin/migrations
+/requirments.txt
