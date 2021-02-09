@@ -49,7 +49,6 @@ class User(AbstractUser):
     objects = UserManager()
 
     is_customer = models.BooleanField(default=False)
-    is_business = models.BooleanField(default=False)
 
 
 class Customer(models.Model):
