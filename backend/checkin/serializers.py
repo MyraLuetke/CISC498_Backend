@@ -23,6 +23,7 @@ class CustomerSerializer(serializers.ModelSerializer):
 
     def create(self, validated_data):
         user_data = validated_data.pop('user')
+        user_data['is_customer'] = True
         user = UserSerializer.create(UserSerializer(), validated_data=user_data)
         customer, created = Customer.objects.update_or_create(user=user, first_name=validated_data.pop('first_name'),
                                                               last_name=validated_data.pop('last_name'),
