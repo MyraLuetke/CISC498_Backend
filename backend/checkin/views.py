@@ -13,7 +13,7 @@ class CustomerCreate(mixins.CreateModelMixin,
 
     def post(self, request, *args, **kwargs):
         serializer = CustomerSerializer(data=request.data)
-        if serializer.is_valid(raise_exception=ValueError):
+        if serializer.is_valid():
             serializer.create(validated_data=request.data)
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.error_messages, status=status.HTTP_400_BAD_REQUEST)
