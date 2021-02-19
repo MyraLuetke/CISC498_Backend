@@ -1,15 +1,25 @@
-from django.shortcuts import render
+from rest_framework import mixins, generics, status
+from rest_framework.permissions import IsAuthenticated, AllowAny
+from rest_framework.response import Response
+from rest_framework.views import APIView
 
-# Create your views here.
-from rest_framework import mixins, generics
-from rest_framework.permissions import IsAuthenticated
+from .models import Customer, User
+from .serializers import CustomerSerializer, UserSerializer
 
-from .models import Customer
-from .serializers import CustomerSerializer
+
+class CustomerCreate(mixins.CreateModelMixin,
+                     APIView):
+    permission_classes = (AllowAny,)
+
+    def post(self, request, *args, **kwargs):
+        serializer = CustomerSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.create(validated_data=request.data)
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.error_messages, status=status.HTTP_400_BAD_REQUEST)
 
 
 class CustomerList(mixins.ListModelMixin,
-                   mixins.CreateModelMixin,
                    generics.GenericAPIView):
     permission_classes = (IsAuthenticated,)
     queryset = Customer.objects.all()
@@ -17,9 +27,6 @@ class CustomerList(mixins.ListModelMixin,
 
     def get(self, request, *args, **kwargs):
         return self.list(request, *args, **kwargs)
-
-    def post(self, request, *args, **kwargs):
-        return self.create(request, *args, **kwargs)
 
 
 class CustomerDetail(mixins.RetrieveModelMixin,
