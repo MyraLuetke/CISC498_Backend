@@ -4,7 +4,7 @@ from rest_framework import status
 from rest_framework.test import APIRequestFactory
 from django.test import Client
 
-from .models import User, Customer
+from .models import User, Customer, Business
 from .views import CustomerCreate
 
 
@@ -72,4 +72,45 @@ class CustomerCreateViewTests(TestCase):
         data = {}
 
         response = c.post('/checkin/create_account/', data=data, content_type="application/json")
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
+
+class BusinessModelTests(TestCase):
+    def setUp(self):
+        user1 = User.objects.create(email="business1@example.com", password="test")
+        Business.objects.create(user=user1, name="Business One", phone_num=1000000000, address="1234 Street St.", capacity=123)
+
+    def test_unique_businesses(self):
+        user1 = User.objects.get(email="business1@example.com")
+        self.assertRaises(IntegrityError, Business.objects.create, user=user1, name="Business Two", phone_num=2000000000, address="1235 Street St.", capacity=123)
+
+    def test_to_string(self):
+        business1 = Business.objects.get(user=User.objects.get(email="business1@example.com"))
+        self.assertEqual(str(business1), "Business One")
+
+
+class BusinessCreateViewTests(TestCase):
+    def test_business_creation_successful_post_request(self):
+        c = Client()
+        data = {
+            "user":
+                {
+                    "email": "business@example.com",
+                    "password": "password"
+                },
+            "name": "business1",
+            "phone_num": "1111111111",
+            "address": "1234 Street St.",
+            "capacity": 123
+        }
+
+        response = c.post('/checkin/create_business_account/', data=data, content_type="application/json")
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        self.assertEqual(User.objects.get(email="business@example.com").is_customer, False)
+
+    def test_business_creation_failed_post_request(self):
+        c = Client()
+        data = {}
+
+        response = c.post('/checkin/create_business_account/', data=data, content_type="application/json")
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
