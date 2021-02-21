@@ -60,7 +60,7 @@ class BusinessCreate(mixins.CreateModelMixin,
 
 class BusinessList(mixins.ListModelMixin,
                    generics.GenericAPIView):
-    #permission_classes = (IsAuthenticated,)
+    permission_classes = (IsAuthenticated,)
     queryset = Business.objects.all()
     serializer_class = BusinessSerializer
 
