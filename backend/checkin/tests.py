@@ -3,8 +3,9 @@ from django.test import TestCase
 from rest_framework import status
 from rest_framework.test import APIRequestFactory
 from django.test import Client
+from django.core.exceptions import ObjectDoesNotExist
 
-from .models import User, Customer
+from .models import User, Customer, Business
 from .views import CustomerCreate
 
 
@@ -63,7 +64,7 @@ class CustomerCreateViewTests(TestCase):
             "phone_num": 1000000000
         }
 
-        response = c.post('/checkin/create_account/', data=data, content_type="application/json")
+        response = c.post('/checkin/customer/create_account/', data=data, content_type="application/json")
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         self.assertEqual(User.objects.get(email="user1@example.com").is_customer, True)
 
@@ -71,5 +72,135 @@ class CustomerCreateViewTests(TestCase):
         c = Client()
         data = {}
 
-        response = c.post('/checkin/create_account/', data=data, content_type="application/json")
+        response = c.post('/checkin/customer/create_account/', data=data, content_type="application/json")
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
+
+class CustomerDetailViewTests(TestCase):
+    def setUp(self):
+        c = Client()
+        data = {
+            "user":
+                {
+                    "email": "user1@example.com",
+                    "password": "password"
+                },
+            "first_name": "User",
+            "last_name": "One",
+            "phone_num": "1111111111"
+        }
+        c.post('/checkin/customer/create_account/', data=data, content_type="application/json")
+
+    def test_customer_detail_successful_get_request(self):
+        c = Client()
+        user_id = "user1@example.com"
+
+        response = c.get(f'/checkin/customer/{user_id}/')
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+    def test_customer_detail_successful_put_request(self):
+        c = Client()
+        data = data = {
+            "phone_num": "0000000000"
+        }
+
+        user_id = "user1@example.com"
+        response = c.put(f'/checkin/customer/{user_id}/', data=data, content_type="application/json")
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(Customer.objects.get(user=User.objects.get(email="user1@example.com")).phone_num, "0000000000")
+
+    def test_customer_detail_successful_delete_request(self):
+        c = Client()
+        user_id = "user1@example.com"
+
+        response = c.delete(f'/checkin/customer/{user_id}/')
+
+        self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
+        self.assertRaises(ObjectDoesNotExist, Customer.objects.get, user=User.objects.get(email="user1@example.com"))
+
+
+class BusinessModelTests(TestCase):
+    def setUp(self):
+        user1 = User.objects.create(email="business1@example.com", password="test")
+        Business.objects.create(user=user1, name="Business One", phone_num=1000000000, address="1234 Street St.", capacity=123)
+
+    def test_unique_businesses(self):
+        user1 = User.objects.get(email="business1@example.com")
+        self.assertRaises(IntegrityError, Business.objects.create, user=user1, name="Business Two", phone_num=2000000000, address="1235 Street St.", capacity=123)
+
+    def test_to_string(self):
+        business1 = Business.objects.get(user=User.objects.get(email="business1@example.com"))
+        self.assertEqual(str(business1), "Business One")
+
+
+class BusinessCreateViewTests(TestCase):
+    def test_business_creation_successful_post_request(self):
+        c = Client()
+        data = {
+            "user":
+                {
+                    "email": "business@example.com",
+                    "password": "password"
+                },
+            "name": "business1",
+            "phone_num": "1111111111",
+            "address": "1234 Street St.",
+            "capacity": 123
+        }
+
+        response = c.post('/checkin/business/create_account/', data=data, content_type="application/json")
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        self.assertEqual(User.objects.get(email="business@example.com").is_customer, False)
+
+    def test_business_creation_failed_post_request(self):
+        c = Client()
+        data = {}
+
+        response = c.post('/checkin/business/create_account/', data=data, content_type="application/json")
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
+
+class BusinessDetailViewTests(TestCase):
+    def setUp(self):
+        c = Client()
+        data = {
+            "user":
+                {
+                    "email": "business@example.com",
+                    "password": "password"
+                },
+            "name": "business1",
+            "phone_num": "1111111111",
+            "address": "1234 Street St.",
+            "capacity": 123
+        }
+        c.post('/checkin/business/create_account/', data=data, content_type="application/json")
+
+    def test_business_detail_successful_get_request(self):
+        c = Client()
+        user_id = "business@example.com"
+
+        response = c.get(f'/checkin/business/{user_id}/')
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+    def test_business_detail_successful_put_request(self):
+        c = Client()
+        data = data = {
+            "address": "999 Street St.",
+        }
+
+        user_id = "business@example.com"
+        response = c.put(f'/checkin/business/{user_id}/', data=data, content_type="application/json")
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(Business.objects.get(user=User.objects.get(email="business@example.com")).address, "999 Street St.")
+
+    def test_business_detail_successful_delete_request(self):
+        c = Client()
+        user_id = "business@example.com"
+
+        response = c.delete(f'/checkin/business/{user_id}/')
+
+        self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
+        self.assertRaises(ObjectDoesNotExist, Business.objects.get, user=User.objects.get(email="business@example.com"))

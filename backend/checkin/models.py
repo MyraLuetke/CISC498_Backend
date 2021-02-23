@@ -61,3 +61,14 @@ class Customer(models.Model):
 
     def __str__(self):
         return self.first_name + ' ' + self.last_name
+
+
+class Business(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE, primary_key=True)
+    name = models.CharField(max_length=100)
+    phone_num = models.CharField(max_length=11)
+    address = models.TextField()
+    capacity = models.IntegerField()
+
+    def __str__(self):
+        return self.name
