@@ -18,7 +18,7 @@ class UserModelTests(TestCase):
     def test_unique_ids(self):
         user1 = User.objects.get(email="one@example.com")
         user2 = User.objects.get(email="two@example.com")
-        self.assertNotEqual(user1.uuid, user2.uuid)
+        self.assertNotEqual(user1.id, user2.id)
 
     def test_unique_emails(self):
         self.assertRaises(IntegrityError, User.objects.create, email="one@example.com", password="differenttest")
@@ -64,7 +64,7 @@ class CustomerCreateViewTests(TestCase):
             "phone_num": 1000000000
         }
 
-        response = c.post('/checkin/create_account/', data=data, content_type="application/json")
+        response = c.post('/checkin/customer/create_account/', data=data, content_type="application/json")
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         self.assertEqual(User.objects.get(email="user1@example.com").is_customer, True)
 
@@ -72,7 +72,7 @@ class CustomerCreateViewTests(TestCase):
         c = Client()
         data = {}
 
-        response = c.post('/checkin/create_account/', data=data, content_type="application/json")
+        response = c.post('/checkin/customer/create_account/', data=data, content_type="application/json")
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
 
@@ -89,13 +89,13 @@ class CustomerDetailViewTests(TestCase):
             "last_name": "One",
             "phone_num": "1111111111"
         }
-        c.post('/checkin/create_account/', data=data, content_type="application/json")
+        c.post('/checkin/customer/create_account/', data=data, content_type="application/json")
 
     def test_customer_detail_successful_get_request(self):
         c = Client()
-        user_id = User.objects.get(email="user1@example.com").uuid
+        user_id = "user1@example.com"
 
-        response = c.get(f'/checkin/{user_id}/')
+        response = c.get(f'/checkin/customer/{user_id}/')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
     def test_customer_detail_successful_put_request(self):
@@ -104,17 +104,17 @@ class CustomerDetailViewTests(TestCase):
             "phone_num": "0000000000"
         }
 
-        user_id = User.objects.get(email="user1@example.com").uuid
-        response = c.put(f'/checkin/{user_id}/', data=data, content_type="application/json")
+        user_id = "user1@example.com"
+        response = c.put(f'/checkin/customer/{user_id}/', data=data, content_type="application/json")
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(Customer.objects.get(user=User.objects.get(email="user1@example.com")).phone_num, "0000000000")
 
     def test_customer_detail_successful_delete_request(self):
         c = Client()
-        user_id = User.objects.get(email="user1@example.com").uuid
+        user_id = "user1@example.com"
 
-        response = c.delete(f'/checkin/{user_id}/')
+        response = c.delete(f'/checkin/customer/{user_id}/')
 
         self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
         self.assertRaises(ObjectDoesNotExist, Customer.objects.get, user=User.objects.get(email="user1@example.com"))
@@ -149,7 +149,7 @@ class BusinessCreateViewTests(TestCase):
             "capacity": 123
         }
 
-        response = c.post('/checkin/create_business_account/', data=data, content_type="application/json")
+        response = c.post('/checkin/business/create_account/', data=data, content_type="application/json")
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         self.assertEqual(User.objects.get(email="business@example.com").is_customer, False)
 
@@ -157,7 +157,7 @@ class BusinessCreateViewTests(TestCase):
         c = Client()
         data = {}
 
-        response = c.post('/checkin/create_business_account/', data=data, content_type="application/json")
+        response = c.post('/checkin/business/create_account/', data=data, content_type="application/json")
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
 
@@ -175,11 +175,11 @@ class BusinessDetailViewTests(TestCase):
             "address": "1234 Street St.",
             "capacity": 123
         }
-        c.post('/checkin/create_business_account/', data=data, content_type="application/json")
+        c.post('/checkin/business/create_account/', data=data, content_type="application/json")
 
     def test_business_detail_successful_get_request(self):
         c = Client()
-        user_id = User.objects.get(email="business@example.com").uuid
+        user_id = "business@example.com"
 
         response = c.get(f'/checkin/business/{user_id}/')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
@@ -190,7 +190,7 @@ class BusinessDetailViewTests(TestCase):
             "address": "999 Street St.",
         }
 
-        user_id = User.objects.get(email="business@example.com").uuid
+        user_id = "business@example.com"
         response = c.put(f'/checkin/business/{user_id}/', data=data, content_type="application/json")
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
@@ -198,7 +198,7 @@ class BusinessDetailViewTests(TestCase):
 
     def test_business_detail_successful_delete_request(self):
         c = Client()
-        user_id = User.objects.get(email="business@example.com").uuid
+        user_id = "business@example.com"
 
         response = c.delete(f'/checkin/business/{user_id}/')
 

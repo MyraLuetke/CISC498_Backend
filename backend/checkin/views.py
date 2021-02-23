@@ -35,6 +35,7 @@ class CustomerDetail(mixins.RetrieveModelMixin,
                      generics.GenericAPIView):
     queryset = Customer.objects.all()
     serializer_class = CustomerSerializer
+    lookup_field = 'user__email'
 
     def get(self, request, *args, **kwargs):
         return self.retrieve(request, *args, **kwargs)
@@ -74,6 +75,7 @@ class BusinessDetail(mixins.RetrieveModelMixin,
                      generics.GenericAPIView):
     queryset = Business.objects.all()
     serializer_class = BusinessSerializer
+    lookup_field = 'user__email'
 
     def get(self, request, *args, **kwargs):
         return self.retrieve(request, *args, **kwargs)
