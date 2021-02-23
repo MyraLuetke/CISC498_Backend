@@ -1,6 +1,7 @@
 from rest_framework import serializers
 
-from .models import Customer, User, Business
+from .models import Customer, User, Business, Visit
+
 
 
 class UserSerializer(serializers.ModelSerializer):
@@ -31,6 +32,7 @@ class CustomerSerializer(serializers.ModelSerializer):
         return customer
 
 
+
 class BusinessSerializer(serializers.ModelSerializer):
     user = UserSerializer(required=True)
 
@@ -49,3 +51,14 @@ class BusinessSerializer(serializers.ModelSerializer):
             capacity=validated_data.pop('capacity'))
 
         return business
+
+
+class VisitSerializer(serializers.ModelSerializer):
+    customer=CustomerSerializer(read_only=True, many=True)
+    business = BusinessSerializer(read_only=True, many=True)
+
+    class Meta:
+        model = Visit
+        fields = ['dateTime', 'customer', 'business']
+
+
