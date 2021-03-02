@@ -12,7 +12,7 @@ class UserSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = User
-        fields = ['email', 'password']
+        fields = ['id','email', 'password']
 
 
 class CustomerSerializer(serializers.ModelSerializer):
@@ -54,11 +54,19 @@ class BusinessSerializer(serializers.ModelSerializer):
 
 
 class VisitSerializer(serializers.ModelSerializer):
-    customer=CustomerSerializer(read_only=True, many=True)
-    business = BusinessSerializer(read_only=True, many=True)
+    #customer=CustomerSerializer(read_only=True, many=True)
+    #business = BusinessSerializer(read_only=True, many=True)
 
     class Meta:
         model = Visit
         fields = ['dateTime', 'customer', 'business']
 
+    def create(self,validated_data):
 
+        customer, __ = Customer.objects.get_or_create(user__id=validated_data["customer_id"])
+        business, __ = Business.objects.get_or_create(user__id=validated_data["business_id"])
+        print(customer, business)
+
+        v=Visit(customer=customer, business=business)
+        print(v)
+        return(v)

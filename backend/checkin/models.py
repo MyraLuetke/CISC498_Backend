@@ -76,16 +76,16 @@ class Business(models.Model):
 
 
 class Visit(models.Model):
-    dateTime = models.DateTimeField(auto_now_add=False)
+    dateTime = models.DateTimeField(auto_now_add=True)
     customer = models.ForeignKey(Customer, on_delete=models.CASCADE)
     #customer = models.ManyToManyField(Customer, on_delete=models.CASCADE)
     business = models.ForeignKey(Business, on_delete=models.CASCADE)
     #business = models.ManyToManyField(Business, on_delete=models.CASCADE)
 
-    class Meta:
-        constraints = [
-            models.UniqueConstraint(fields=['dateTime', 'customer','business'])
-        ]
+    #class Meta:
+    #    constraints = [
+    #        models.UniqueConstraint(fields=['dateTime', 'customer','business'], name='unique_visit')
+    #    ]
 
     def __str__(self):
         return self.customer + ' ' + self.dateTime #this Wont Work?  might need a through feild in other stuff
