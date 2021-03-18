@@ -10,7 +10,8 @@ urlpatterns = [
     path('checkin/business/create_account/', views.BusinessCreate.as_view()),
     path('checkin/business/<user__email>/', views.BusinessDetail.as_view()),
 
-
+    path('checkin/visit/', views.VisitList.as_view()),
     path('checkin/visit/create_visit/', views.VisitCreate.as_view()),
+
 
 ]

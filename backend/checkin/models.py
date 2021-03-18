@@ -76,11 +76,13 @@ class Business(models.Model):
 
 
 class Visit(models.Model):
-    dateTime = models.DateTimeField(auto_now_add=True)
+    dateTime = models.DateTimeField(auto_now_add=False)
     customer = models.ForeignKey(Customer, on_delete=models.CASCADE)
     #customer = models.ManyToManyField(Customer, on_delete=models.CASCADE)
     business = models.ForeignKey(Business, on_delete=models.CASCADE)
     #business = models.ManyToManyField(Business, on_delete=models.CASCADE)
+
+    numVisitors=models.IntegerField()
 
     #class Meta:
     #    constraints = [
@@ -88,5 +90,5 @@ class Visit(models.Model):
     #    ]
 
     def __str__(self):
-        return self.customer + ' ' + self.dateTime #this Wont Work?  might need a through feild in other stuff
+        return self.customer.__str__() + ' ' + self.business.__str__() +' ' + self.dateTime.__str__()
 

@@ -59,14 +59,18 @@ class VisitSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Visit
-        fields = ['dateTime', 'customer', 'business']
+        fields = ['dateTime', 'customer', 'business', 'numVisitors']
+        #fields = ['dateTime', 'customer', 'business']
 
-    def create(self,validated_data):
+    def create(self, validated_data):
 
-        customer, __ = Customer.objects.get_or_create(user__id=validated_data["customer_id"])
-        business, __ = Business.objects.get_or_create(user__id=validated_data["business_id"])
-        print(customer, business)
+        customer, __ = Customer.objects.get_or_create(user__id=validated_data.pop("customer"))
+        business, __ = Business.objects.get_or_create(user__id=validated_data.pop("business"))
 
-        v=Visit(customer=customer, business=business)
-        print(v)
-        return(v)
+        visit = Visit.objects.create(
+            dateTime=validated_data.pop('dateTime'),
+            customer=customer,
+            business=business,
+            numVisitors=validated_data.pop('numVisitors'))
+
+        return visit
