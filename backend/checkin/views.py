@@ -88,30 +88,22 @@ class BusinessDetail(mixins.RetrieveModelMixin,
         return self.destroy(request, *args, **kwargs)
 
 
-class ChangePassword(generics.GenericAPIView):
+class ChangePassword(mixins.UpdateModelMixin, generics.GenericAPIView):
     queryset = User.objects.all()
     serializer_class = ChangePasswordSerializer
     permission_classes = (IsAuthenticated,)
-    lookup_field = 'customer__user__email'
+    lookup_field = 'email'
 
     def put(self, request, *args, **kwargs):
-        self.object = self.get_object()
+        user = self.get_object()
         serializer = self.get_serializer(data=request.data)
 
         if serializer.is_valid():
             # Check old password
-            if not self.object.check_password(serializer.data.get("old_password")):
-                return Response({"old_password": ["Wrong password."]}, status=status.HTTP_400_BAD_REQUEST)
+            if not user.check_password(serializer.data.get("old_password")):
+                return Response(serializer.error_messages, status=status.HTTP_400_BAD_REQUEST)
             # set_password also hashes the password that the user will get
-            self.object.set_password(serializer.data.get("new_password"))
-            self.object.save()
-            response = {
-                'status': 'success',
-                'code': status.HTTP_200_OK,
-                'message': 'Password updated successfully',
-                'data': []
-            }
-
-            return Response(response)
-
+            user.set_password(serializer.data.get("new_password"))
+            user.save()
+            return Response(serializer.data, status=status.HTTP_200_OK)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
