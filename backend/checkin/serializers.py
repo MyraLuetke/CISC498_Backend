@@ -9,6 +9,7 @@ class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
         # The default result (access/refresh tokens)
         data = super(CustomTokenObtainPairSerializer, self).validate(attrs)
         data.update({'id': self.user.id})
+        data.update({'is_customer': self.user.is_customer})
         return data
 
 
