@@ -11,6 +11,7 @@ class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
         data.update({'id': self.user.id})
         return data
 
+
 class UserSerializer(serializers.ModelSerializer):
 
     def create(self, validated_data):
@@ -19,7 +20,7 @@ class UserSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = User
-        fields = ['id','email', 'password']
+        fields = ['id', 'email', 'password']
 
 
 class ChangePasswordSerializer(serializers.Serializer):

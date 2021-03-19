@@ -41,7 +41,7 @@ class CustomerDetail(mixins.RetrieveModelMixin,
                      generics.GenericAPIView):
     queryset = Customer.objects.all()
     serializer_class = CustomerSerializer
-    lookup_field = 'user__email'
+    lookup_field = 'user__id'
 
     def get(self, request, *args, **kwargs):
         return self.retrieve(request, *args, **kwargs)
@@ -81,7 +81,7 @@ class BusinessDetail(mixins.RetrieveModelMixin,
                      generics.GenericAPIView):
     queryset = Business.objects.all()
     serializer_class = BusinessSerializer
-    lookup_field = 'user__email'
+    lookup_field = 'user__id'
 
     def get(self, request, *args, **kwargs):
         return self.retrieve(request, *args, **kwargs)
@@ -97,7 +97,7 @@ class ChangePassword(mixins.UpdateModelMixin, generics.GenericAPIView):
     queryset = User.objects.all()
     serializer_class = ChangePasswordSerializer
     permission_classes = (IsAuthenticated,)
-    lookup_field = 'email'
+    lookup_field = 'id'
 
     def put(self, request, *args, **kwargs):
         user = self.get_object()
