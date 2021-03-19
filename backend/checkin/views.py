@@ -6,7 +6,7 @@ from rest_framework.views import APIView
 from rest_framework_simplejwt.views import TokenObtainPairView
 
 from .models import Customer, User, Business, Visit
-from .serializers import CustomerSerializer, UserSerializer, BusinessSerializer, ChangePasswordSerializer, VisitSerializer, CustomTokenObtainPairSerializer, ChangeEmailSerializer
+from .serializers import CustomerSerializer, UserSerializer, BusinessSerializer, ChangePasswordSerializer, VisitSerializer, CustomTokenObtainPairSerializer
 
 
 class CustomTokenObtainPairView(TokenObtainPairView):
@@ -116,7 +116,7 @@ class ChangePassword(mixins.UpdateModelMixin, generics.GenericAPIView):
 
 class ChangeEmail(mixins.UpdateModelMixin, generics.GenericAPIView):
     queryset = User.objects.all()
-    serializer_class = ChangeEmailSerializer
+    serializer_class = UserSerializer
     permission_classes = (IsAuthenticated,)
     lookup_field = 'id'
 
