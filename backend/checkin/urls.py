@@ -15,6 +15,7 @@ urlpatterns = [
     path('checkin/business/<user__id>/', views.BusinessDetail.as_view()),
 
     path('checkin/change_password/<id>/', views.ChangePassword.as_view()),
+    path('checkin/change_email/<id>/', views.ChangeEmail.as_view()),
 
     path('checkin/visit/', views.VisitList.as_view()),
     path('checkin/visit/create_visit/', views.VisitCreate.as_view()),

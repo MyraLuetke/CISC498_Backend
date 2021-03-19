@@ -271,6 +271,69 @@ class ChangePasswordViewTests(TestCase):
         self.assertTrue(User.objects.get(id="1").check_password("password"))
 
 
+class ChangeEmailViewTests(TestCase):
+
+    def setUp(self):
+        c = Client()
+        data = {
+            "user":
+                {
+                    "email": "customer@example.com",
+                    "password": "password"
+                },
+            "first_name": "Customer",
+            "last_name": "One",
+            "phone_num": "1111111111"
+        }
+        c.post('/checkin/customer/create_account/', data=data, content_type="application/json")
+
+        data = {
+            "email": "customer@example.com",
+            "password": "password"
+        }
+        response = c.post('/api/token/', data=data, content_type="application/json")
+        self.access = response.json()["access"]
+
+    def test_change_email_successful_put_request(self):
+        c = Client()
+        data = {
+            "email": "customer2@example.com",
+            "password": "password"
+        }
+
+        user_id = "1"
+        response = c.put(f'/checkin/change_email/{user_id}/', HTTP_AUTHORIZATION='Bearer ' + self.access,
+                         data=data, content_type="application/json")
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(User.objects.get(id="1").email, "customer2@example.com")
+
+    def test_change_email_unsuccessful_put_request_wrong_password(self):
+        c = Client()
+        data = {
+            "email": "customer2@example.com",
+            "password": "wrongpassword"
+        }
+
+        user_id = "1"
+        response = c.put(f'/checkin/change_email/{user_id}/', HTTP_AUTHORIZATION='Bearer ' + self.access,
+                         data=data, content_type="application/json")
+
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertEqual(User.objects.get(id="1").email, "customer@example.com")
+
+    def test_change_email_unsuccessful_put_request_insufficient_data(self):
+        c = Client()
+        data = {}
+
+        user_id = "1"
+        response = c.put(f'/checkin/change_email/{user_id}/', HTTP_AUTHORIZATION='Bearer ' + self.access,
+                         data=data, content_type="application/json")
+
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertEqual(User.objects.get(id="1").email, "customer@example.com")
+
+
 class VisitModelTests(TestCase):
     def setUp(self):
         user1 = User.objects.create(email="user1@example.com", password="test")
