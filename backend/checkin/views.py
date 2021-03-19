@@ -114,8 +114,7 @@ class ChangePassword(mixins.UpdateModelMixin, generics.GenericAPIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
-class VisitCreate(mixins.CreateModelMixin,
-                     APIView):
+class VisitCreate(mixins.CreateModelMixin, APIView):
     permission_classes = (AllowAny,)
 
     def post(self, request, *args, **kwargs):
@@ -126,33 +125,11 @@ class VisitCreate(mixins.CreateModelMixin,
         return Response(serializer.error_messages, status=status.HTTP_400_BAD_REQUEST)
 
 
-#TEMP: just for database viewing purposes. Can delete
-class VisitList(mixins.ListModelMixin,
-                   generics.GenericAPIView):
+# TEMP: just for database viewing purposes. Can delete
+class VisitList(mixins.ListModelMixin, generics.GenericAPIView):
     permission_classes = (IsAuthenticated,)
     queryset = Visit.objects.all()
     serializer_class = VisitSerializer
 
     def get(self, request, *args, **kwargs):
         return self.list(request, *args, **kwargs)
-
-
-''' #dont actually need this at any point
-class VisitDetail(mixins.RetrieveModelMixin,
-                     mixins.UpdateModelMixin,
-                     mixins.DestroyModelMixin,
-                     generics.GenericAPIView):
-    queryset = Visit.objects.all()
-    serializer_class = VisitSerializer
-
-
-
-    #def get(self, request, *args, **kwargs):
-    #    return self.retrieve(request, *args, **kwargs)
-
-    #def put(self, request, *args, **kwargs):
-    #    return self.update(request, *args, **kwargs)
-
-    # def delete(self, request, *args, **kwargs):
-    #     return self.destroy(request, *args, **kwargs)
-'''

@@ -46,7 +46,6 @@ class CustomerSerializer(serializers.ModelSerializer):
         return customer
 
 
-
 class BusinessSerializer(serializers.ModelSerializer):
     user = UserSerializer(required=True)
 
@@ -68,13 +67,10 @@ class BusinessSerializer(serializers.ModelSerializer):
 
 
 class VisitSerializer(serializers.ModelSerializer):
-    #customer=CustomerSerializer(read_only=True, many=True)
-    #business = BusinessSerializer(read_only=True, many=True)
 
     class Meta:
         model = Visit
         fields = ['dateTime', 'customer', 'business', 'numVisitors']
-        #fields = ['dateTime', 'customer', 'business']
 
     def create(self, validated_data):
 

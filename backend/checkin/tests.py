@@ -270,7 +270,7 @@ class ChangePasswordViewTests(TestCase):
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertTrue(User.objects.get(id="1").check_password("password"))
 
-        
+
 class VisitModelTests(TestCase):
     def setUp(self):
         user1 = User.objects.create(email="user1@example.com", password="test")
@@ -279,15 +279,10 @@ class VisitModelTests(TestCase):
         business1 = Business.objects.create(user=user11, name="Business One", phone_num=1000000000, address="1234 Street St.", capacity=123)
         Visit.objects.create(dateTime='2006-10-25 14:30:59', customer=customer1, business=business1, numVisitors=3)
 
-    ##visit does not neet to be unique
-    ##def test_unique_visit(self):
-
-    ##might have problems here
     def test_to_string(self):
         customer1 = Customer.objects.get(user=User.objects.get(email="user1@example.com"))
         business1 = Business.objects.get(user=User.objects.get(email="business1@example.com"))
         visit1 = Visit.objects.get(customer=customer1, business=business1)
-        #visit1 = Visit.objects.get(customer=customer1)
         self.assertEqual(str(visit1), "Customer One Business One 2006-10-25 14:30:59")
 
 
@@ -302,9 +297,9 @@ class VisitCreateViewTests(TestCase):
         c = Client()
         data = {
             "dateTime": "2006-10-25 14:30:59",
-            "customer":"1",
-            "business":"2",
-            "numVisitors":"6"
+            "customer": "1",
+            "business": "2",
+            "numVisitors": "6"
         }
         response = c.post('/checkin/visit/create_visit/', data=data, content_type="application/json")
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
