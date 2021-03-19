@@ -3,10 +3,15 @@ from rest_framework import mixins, generics, status
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.response import Response
 from rest_framework.views import APIView
-
+from rest_framework_simplejwt.views import TokenObtainPairView
 
 from .models import Customer, User, Business, Visit
-from .serializers import CustomerSerializer, UserSerializer, BusinessSerializer, ChangePasswordSerializer, VisitSerializer
+from .serializers import CustomerSerializer, UserSerializer, BusinessSerializer, ChangePasswordSerializer, VisitSerializer, CustomTokenObtainPairSerializer
+
+
+class CustomTokenObtainPairView(TokenObtainPairView):
+    serializer_class = CustomTokenObtainPairSerializer
+
 
 class CustomerCreate(mixins.CreateModelMixin,
                      APIView):
