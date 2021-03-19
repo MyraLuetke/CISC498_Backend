@@ -63,6 +63,7 @@ class Customer(models.Model):
         return self.first_name + ' ' + self.last_name
 
 
+
 class Business(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE, primary_key=True)
     name = models.CharField(max_length=100)
@@ -72,3 +73,22 @@ class Business(models.Model):
 
     def __str__(self):
         return self.name
+
+
+class Visit(models.Model):
+    dateTime = models.DateTimeField(auto_now_add=False)
+    customer = models.ForeignKey(Customer, on_delete=models.CASCADE)
+    #customer = models.ManyToManyField(Customer, on_delete=models.CASCADE)
+    business = models.ForeignKey(Business, on_delete=models.CASCADE)
+    #business = models.ManyToManyField(Business, on_delete=models.CASCADE)
+
+    numVisitors=models.IntegerField()
+
+    #class Meta:
+    #    constraints = [
+    #        models.UniqueConstraint(fields=['dateTime', 'customer','business'], name='unique_visit')
+    #    ]
+
+    def __str__(self):
+        return self.customer.__str__() + ' ' + self.business.__str__() +' ' + self.dateTime.__str__()
+

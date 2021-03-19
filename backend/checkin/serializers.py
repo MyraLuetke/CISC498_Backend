@@ -1,6 +1,7 @@
 from rest_framework import serializers
 
-from .models import Customer, User, Business
+from .models import Customer, User, Business, Visit
+
 
 
 class UserSerializer(serializers.ModelSerializer):
@@ -11,7 +12,7 @@ class UserSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = User
-        fields = ['email', 'password']
+        fields = ['id','email', 'password']
 
 
 class CustomerSerializer(serializers.ModelSerializer):
@@ -29,6 +30,7 @@ class CustomerSerializer(serializers.ModelSerializer):
                                                               last_name=validated_data.pop('last_name'),
                                                               phone_num=validated_data.pop('phone_num'))
         return customer
+
 
 
 class BusinessSerializer(serializers.ModelSerializer):
@@ -49,3 +51,26 @@ class BusinessSerializer(serializers.ModelSerializer):
             capacity=validated_data.pop('capacity'))
 
         return business
+
+
+class VisitSerializer(serializers.ModelSerializer):
+    #customer=CustomerSerializer(read_only=True, many=True)
+    #business = BusinessSerializer(read_only=True, many=True)
+
+    class Meta:
+        model = Visit
+        fields = ['dateTime', 'customer', 'business', 'numVisitors']
+        #fields = ['dateTime', 'customer', 'business']
+
+    def create(self, validated_data):
+
+        customer, __ = Customer.objects.get_or_create(user__id=validated_data.pop("customer"))
+        business, __ = Business.objects.get_or_create(user__id=validated_data.pop("business"))
+
+        visit = Visit.objects.create(
+            dateTime=validated_data.pop('dateTime'),
+            customer=customer,
+            business=business,
+            numVisitors=validated_data.pop('numVisitors'))
+
+        return visit
