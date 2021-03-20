@@ -6,7 +6,8 @@ from rest_framework.views import APIView
 from rest_framework_simplejwt.views import TokenObtainPairView
 
 from .models import Customer, User, Business, Visit
-from .serializers import CustomerSerializer, UserSerializer, BusinessSerializer, ChangePasswordSerializer, VisitSerializer, CustomTokenObtainPairSerializer
+from .serializers import CustomerSerializer, UserSerializer, BusinessSerializer, ChangePasswordSerializer, \
+    VisitSerializer, CustomTokenObtainPairSerializer, ChangeEmailSerializer
 
 
 class CustomTokenObtainPairView(TokenObtainPairView):
@@ -116,7 +117,7 @@ class ChangePassword(mixins.UpdateModelMixin, generics.GenericAPIView):
 
 class ChangeEmail(mixins.UpdateModelMixin, generics.GenericAPIView):
     queryset = User.objects.all()
-    serializer_class = UserSerializer
+    serializer_class = ChangeEmailSerializer
     permission_classes = (IsAuthenticated,)
     lookup_field = 'id'
 
@@ -125,9 +126,6 @@ class ChangeEmail(mixins.UpdateModelMixin, generics.GenericAPIView):
         serializer = self.get_serializer(data=request.data)
 
         if serializer.is_valid():
-            if not user.check_password(serializer.data.get("password")):
-                return Response(serializer.error_messages, status=status.HTTP_400_BAD_REQUEST)
-
             user.email = serializer.data.get("email")
             user.save()
             return Response(serializer.data, status=status.HTTP_200_OK)

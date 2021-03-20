@@ -100,7 +100,7 @@ class CustomerDetailViewTests(TestCase):
 
     def test_customer_detail_successful_put_request(self):
         c = Client()
-        data = data = {
+        data = {
             "phone_num": "0000000000"
         }
 
@@ -109,6 +109,7 @@ class CustomerDetailViewTests(TestCase):
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(Customer.objects.get(user=User.objects.get(id="1")).phone_num, "0000000000")
+
 
     def test_customer_detail_successful_delete_request(self):
         c = Client()
@@ -298,7 +299,6 @@ class ChangeEmailViewTests(TestCase):
         c = Client()
         data = {
             "email": "customer2@example.com",
-            "password": "password"
         }
 
         user_id = "1"
@@ -308,11 +308,10 @@ class ChangeEmailViewTests(TestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(User.objects.get(id="1").email, "customer2@example.com")
 
-    def test_change_email_unsuccessful_put_request_wrong_password(self):
+    def test_change_password_not_possible_through_this_view(self):
         c = Client()
         data = {
-            "email": "customer2@example.com",
-            "password": "wrongpassword"
+            "password": "newpassword",
         }
 
         user_id = "1"
@@ -320,19 +319,7 @@ class ChangeEmailViewTests(TestCase):
                          data=data, content_type="application/json")
 
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-        self.assertEqual(User.objects.get(id="1").email, "customer@example.com")
-
-    def test_change_email_unsuccessful_put_request_insufficient_data(self):
-        c = Client()
-        data = {}
-
-        user_id = "1"
-        response = c.put(f'/checkin/change_email/{user_id}/', HTTP_AUTHORIZATION='Bearer ' + self.access,
-                         data=data, content_type="application/json")
-
-        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-        self.assertEqual(User.objects.get(id="1").email, "customer@example.com")
-
+        self.assertTrue(User.objects.get(id="1").check_password("password"))
 
 class VisitModelTests(TestCase):
     def setUp(self):
