@@ -40,6 +40,7 @@ class CustomerDetail(mixins.RetrieveModelMixin,
                      mixins.UpdateModelMixin,
                      mixins.DestroyModelMixin,
                      generics.GenericAPIView):
+    permission_classes = (IsAuthenticated,)
     queryset = Customer.objects.all()
     serializer_class = CustomerSerializer
     lookup_field = 'user__id'
@@ -80,6 +81,7 @@ class BusinessDetail(mixins.RetrieveModelMixin,
                      mixins.UpdateModelMixin,
                      mixins.DestroyModelMixin,
                      generics.GenericAPIView):
+    permission_classes = (IsAuthenticated,)
     queryset = Business.objects.all()
     serializer_class = BusinessSerializer
     lookup_field = 'user__id'
@@ -133,7 +135,7 @@ class ChangeEmail(mixins.UpdateModelMixin, generics.GenericAPIView):
 
 
 class VisitCreate(mixins.CreateModelMixin, APIView):
-    permission_classes = (AllowAny,)
+    permission_classes = (IsAuthenticated,)
 
     def post(self, request, *args, **kwargs):
         serializer = VisitSerializer(data=request.data)

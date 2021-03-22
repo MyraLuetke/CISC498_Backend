@@ -80,8 +80,8 @@ class VisitSerializer(serializers.ModelSerializer):
 
     def create(self, validated_data):
 
-        customer, __ = Customer.objects.get_or_create(user__id=validated_data.pop("customer"))
-        business, __ = Business.objects.get_or_create(user__id=validated_data.pop("business"))
+        customer = Customer.objects.get(user__id=validated_data.pop("customer"))
+        business = Business.objects.get(user__id=validated_data.pop("business"))
 
         visit = Visit.objects.create(
             dateTime=validated_data.pop('dateTime'),
