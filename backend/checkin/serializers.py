@@ -1,7 +1,16 @@
 from rest_framework import serializers
+from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 
 from .models import Customer, User, Business, Visit
 
+
+class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
+    def validate(self, attrs):
+        # The default result (access/refresh tokens)
+        data = super(CustomTokenObtainPairSerializer, self).validate(attrs)
+        data.update({'id': self.user.id})
+        data.update({'is_customer': self.user.is_customer})
+        return data
 
 
 class UserSerializer(serializers.ModelSerializer):
@@ -12,13 +21,18 @@ class UserSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = User
-        fields = ['id','email', 'password']
+        fields = ['id', 'email', 'password']
 
 
 class ChangePasswordSerializer(serializers.Serializer):
 
     old_password = serializers.CharField(required=True)
     new_password = serializers.CharField(required=True)
+
+
+class ChangeEmailSerializer(serializers.Serializer):
+
+    email = serializers.CharField(required=True)
 
 
 class CustomerSerializer(serializers.ModelSerializer):
@@ -36,7 +50,6 @@ class CustomerSerializer(serializers.ModelSerializer):
                                                               last_name=validated_data.pop('last_name'),
                                                               phone_num=validated_data.pop('phone_num'))
         return customer
-
 
 
 class BusinessSerializer(serializers.ModelSerializer):
@@ -60,18 +73,15 @@ class BusinessSerializer(serializers.ModelSerializer):
 
 
 class VisitSerializer(serializers.ModelSerializer):
-    #customer=CustomerSerializer(read_only=True, many=True)
-    #business = BusinessSerializer(read_only=True, many=True)
 
     class Meta:
         model = Visit
         fields = ['dateTime', 'customer', 'business', 'numVisitors']
-        #fields = ['dateTime', 'customer', 'business']
 
     def create(self, validated_data):
 
-        customer, __ = Customer.objects.get_or_create(user__id=validated_data.pop("customer"))
-        business, __ = Business.objects.get_or_create(user__id=validated_data.pop("business"))
+        customer = Customer.objects.get(user__id=validated_data.pop("customer"))
+        business = Business.objects.get(user__id=validated_data.pop("business"))
 
         visit = Visit.objects.create(
             dateTime=validated_data.pop('dateTime'),

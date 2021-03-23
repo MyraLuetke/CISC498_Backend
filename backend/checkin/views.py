@@ -3,10 +3,16 @@ from rest_framework import mixins, generics, status
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.response import Response
 from rest_framework.views import APIView
-
+from rest_framework_simplejwt.views import TokenObtainPairView
 
 from .models import Customer, User, Business, Visit
-from .serializers import CustomerSerializer, UserSerializer, BusinessSerializer, ChangePasswordSerializer, VisitSerializer
+from .serializers import CustomerSerializer, UserSerializer, BusinessSerializer, ChangePasswordSerializer, \
+    VisitSerializer, CustomTokenObtainPairSerializer, ChangeEmailSerializer
+
+
+class CustomTokenObtainPairView(TokenObtainPairView):
+    serializer_class = CustomTokenObtainPairSerializer
+
 
 class CustomerCreate(mixins.CreateModelMixin,
                      APIView):
@@ -34,9 +40,10 @@ class CustomerDetail(mixins.RetrieveModelMixin,
                      mixins.UpdateModelMixin,
                      mixins.DestroyModelMixin,
                      generics.GenericAPIView):
+    permission_classes = (IsAuthenticated,)
     queryset = Customer.objects.all()
     serializer_class = CustomerSerializer
-    lookup_field = 'user__email'
+    lookup_field = 'user__id'
 
     def get(self, request, *args, **kwargs):
         return self.retrieve(request, *args, **kwargs)
@@ -74,9 +81,10 @@ class BusinessDetail(mixins.RetrieveModelMixin,
                      mixins.UpdateModelMixin,
                      mixins.DestroyModelMixin,
                      generics.GenericAPIView):
+    permission_classes = (IsAuthenticated,)
     queryset = Business.objects.all()
     serializer_class = BusinessSerializer
-    lookup_field = 'user__email'
+    lookup_field = 'user__id'
 
     def get(self, request, *args, **kwargs):
         return self.retrieve(request, *args, **kwargs)
@@ -92,7 +100,7 @@ class ChangePassword(mixins.UpdateModelMixin, generics.GenericAPIView):
     queryset = User.objects.all()
     serializer_class = ChangePasswordSerializer
     permission_classes = (IsAuthenticated,)
-    lookup_field = 'email'
+    lookup_field = 'id'
 
     def put(self, request, *args, **kwargs):
         user = self.get_object()
@@ -109,9 +117,25 @@ class ChangePassword(mixins.UpdateModelMixin, generics.GenericAPIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
-class VisitCreate(mixins.CreateModelMixin,
-                     APIView):
-    permission_classes = (AllowAny,)
+class ChangeEmail(mixins.UpdateModelMixin, generics.GenericAPIView):
+    queryset = User.objects.all()
+    serializer_class = ChangeEmailSerializer
+    permission_classes = (IsAuthenticated,)
+    lookup_field = 'id'
+
+    def put(self, request, *args, **kwargs):
+        user = self.get_object()
+        serializer = self.get_serializer(data=request.data)
+
+        if serializer.is_valid():
+            user.email = serializer.data.get("email")
+            user.save()
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        return Response(serializer.error_messages, status=status.HTTP_400_BAD_REQUEST)
+
+
+class VisitCreate(mixins.CreateModelMixin, APIView):
+    permission_classes = (IsAuthenticated,)
 
     def post(self, request, *args, **kwargs):
         serializer = VisitSerializer(data=request.data)
@@ -121,33 +145,11 @@ class VisitCreate(mixins.CreateModelMixin,
         return Response(serializer.error_messages, status=status.HTTP_400_BAD_REQUEST)
 
 
-#TEMP: just for database viewing purposes. Can delete
-class VisitList(mixins.ListModelMixin,
-                   generics.GenericAPIView):
+# TEMP: just for database viewing purposes. Can delete
+class VisitList(mixins.ListModelMixin, generics.GenericAPIView):
     permission_classes = (IsAuthenticated,)
     queryset = Visit.objects.all()
     serializer_class = VisitSerializer
 
     def get(self, request, *args, **kwargs):
         return self.list(request, *args, **kwargs)
-
-
-''' #dont actually need this at any point
-class VisitDetail(mixins.RetrieveModelMixin,
-                     mixins.UpdateModelMixin,
-                     mixins.DestroyModelMixin,
-                     generics.GenericAPIView):
-    queryset = Visit.objects.all()
-    serializer_class = VisitSerializer
-
-
-
-    #def get(self, request, *args, **kwargs):
-    #    return self.retrieve(request, *args, **kwargs)
-
-    #def put(self, request, *args, **kwargs):
-    #    return self.update(request, *args, **kwargs)
-
-    # def delete(self, request, *args, **kwargs):
-    #     return self.destroy(request, *args, **kwargs)
-'''
