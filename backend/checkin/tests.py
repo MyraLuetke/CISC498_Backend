@@ -61,7 +61,8 @@ class CustomerCreateViewTests(TestCase):
             },
             "first_name": "Customer",
             "last_name": "One",
-            "phone_num": 1000000000
+            "phone_num": 1000000000,
+            "contact_pref": 'P'
         }
 
         response = c.post('/checkin/customer/create_account/', data=data, content_type="application/json")
@@ -87,7 +88,8 @@ class CustomerDetailViewTests(TestCase):
                 },
             "first_name": "User",
             "last_name": "One",
-            "phone_num": "1111111111"
+            "phone_num": "1111111111",
+            "contact_pref": 'P'
         }
         c.post('/checkin/customer/create_account/', data=data, content_type="application/json")
 
@@ -155,7 +157,8 @@ class BusinessCreateViewTests(TestCase):
             "name": "business1",
             "phone_num": "1111111111",
             "address": "1234 Street St.",
-            "capacity": 123
+            "capacity": 123,
+            "contact_pref": 'P'
         }
 
         response = c.post('/checkin/business/create_account/', data=data, content_type="application/json")
@@ -182,7 +185,8 @@ class BusinessDetailViewTests(TestCase):
             "name": "business1",
             "phone_num": "1111111111",
             "address": "1234 Street St.",
-            "capacity": 123
+            "capacity": 123,
+            "contact_pref": 'P'
         }
         c.post('/checkin/business/create_account/', data=data, content_type="application/json")
 
@@ -234,7 +238,8 @@ class ChangePasswordViewTests(TestCase):
                 },
             "first_name": "Customer",
             "last_name": "One",
-            "phone_num": "1111111111"
+            "phone_num": "1111111111",
+            "contact_pref": 'P'
         }
         c.post('/checkin/customer/create_account/', data=data, content_type="application/json")
 
@@ -299,7 +304,8 @@ class ChangeEmailViewTests(TestCase):
                 },
             "first_name": "Customer",
             "last_name": "One",
-            "phone_num": "1111111111"
+            "phone_num": "1111111111",
+            "contact_pref": 'P'
         }
         c.post('/checkin/customer/create_account/', data=data, content_type="application/json")
 
@@ -363,7 +369,8 @@ class VisitCreateViewTests(TestCase):
                 },
             "first_name": "Customer",
             "last_name": "One",
-            "phone_num": "1000000000"
+            "phone_num": "1000000000",
+            "contact_pref": 'P'
         }
         c.post('/checkin/customer/create_account/', data=data, content_type="application/json")
 
@@ -376,7 +383,8 @@ class VisitCreateViewTests(TestCase):
             "name": "business one",
             "phone_num": "1000000000",
             "address": "1234 Street St.",
-            "capacity": 123
+            "capacity": 123,
+            "contact_pref": 'P'
         }
         c.post('/checkin/business/create_account/', data=data, content_type="application/json")
 
