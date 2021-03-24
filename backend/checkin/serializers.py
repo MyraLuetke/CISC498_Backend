@@ -40,7 +40,7 @@ class CustomerSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Customer
-        fields = ['user', 'first_name', 'last_name', 'phone_num', 'email_verification']
+        fields = ['user', 'first_name', 'last_name', 'phone_num', 'email_verification', 'contact_pref']
 
     def create(self, validated_data):
         user_data = validated_data.pop('user')
@@ -57,7 +57,7 @@ class BusinessSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Business
-        fields = ['user', 'name', 'phone_num', 'address', 'capacity']
+        fields = ['user', 'name', 'phone_num', 'address', 'capacity', 'contact_pref']
 
     def create(self, validated_data):
         user_data = validated_data.pop('user')
