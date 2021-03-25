@@ -13,6 +13,7 @@ urlpatterns = [
     path('checkin/business/', views.BusinessList.as_view()),
     path('checkin/business/create_account/', views.BusinessCreate.as_view()),
     path('checkin/business/<user__id>/', views.BusinessDetail.as_view()),
+    path('checkin/business/checkin_customer/', views.BusinessAddVisitCreate.as_view()),
 
     path('checkin/change_password/<id>/', views.ChangePassword.as_view()),
     path('checkin/change_email/<id>/', views.ChangeEmail.as_view()),

@@ -74,12 +74,23 @@ class Business(models.Model):
         return self.name
 
 
-class Visit(models.Model):
+class BusinessAddVisit(models.Model):
     dateTime = models.DateTimeField(auto_now_add=False)
-    customer = models.ForeignKey(Customer, on_delete=models.CASCADE)
-    business = models.ForeignKey(Business, on_delete=models.CASCADE)
-
+    first_name = models.CharField(max_length=100)
+    last_name = models.CharField(max_length=100)
+    phone_num = models.CharField(max_length=11)
+    business = models.ForeignKey(Business, on_delete=models.PROTECT)
     numVisitors = models.IntegerField()
 
     def __str__(self):
-        return self.customer.__str__() + ' ' + self.business.__str__() + ' ' + self.dateTime.__str__()
+        return self.first_name + ' ' + self.last_name + ' ' + self.phone_num + ' ' + self.business.__str__() +' ' + self.dateTime.__str__()
+
+
+class Visit(models.Model):
+    dateTime = models.DateTimeField(auto_now_add=False)
+    customer = models.ForeignKey(Customer, on_delete=models.PROTECT)
+    business = models.ForeignKey(Business, on_delete=models.PROTECT)
+    numVisitors = models.IntegerField()
+
+    def __str__(self):
+        return self.customer.__str__() + ' ' + self.business.__str__() +' ' + self.dateTime.__str__()
