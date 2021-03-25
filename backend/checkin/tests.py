@@ -100,7 +100,7 @@ class CustomerDetailViewTests(TestCase):
 
     def test_customer_detail_successful_get_request(self):
         c = Client()
-        user_id = "1"
+        user_id = User.objects.get(email="user1@example.com").id
 
         response = c.get(f'/checkin/customer/{user_id}/', HTTP_AUTHORIZATION='Bearer ' + self.access)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
@@ -111,22 +111,21 @@ class CustomerDetailViewTests(TestCase):
             "phone_num": "0000000000"
         }
 
-        user_id = "1"
+        user_id = User.objects.get(email="user1@example.com").id
         response = c.put(f'/checkin/customer/{user_id}/', HTTP_AUTHORIZATION='Bearer ' + self.access, data=data,
                          content_type="application/json")
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(Customer.objects.get(user=User.objects.get(id="1")).phone_num, "0000000000")
-
+        self.assertEqual(Customer.objects.get(user=User.objects.get(id=user_id)).phone_num, "0000000000")
 
     def test_customer_detail_successful_delete_request(self):
         c = Client()
-        user_id = "1"
+        user_id = User.objects.get(email="user1@example.com").id
 
         response = c.delete(f'/checkin/customer/{user_id}/', HTTP_AUTHORIZATION='Bearer ' + self.access)
 
         self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
-        self.assertRaises(ObjectDoesNotExist, Customer.objects.get, user=User.objects.get(id="1"))
+        self.assertRaises(ObjectDoesNotExist, Customer.objects.get, user=User.objects.get(id=user_id))
 
 
 class BusinessModelTests(TestCase):
@@ -195,7 +194,7 @@ class BusinessDetailViewTests(TestCase):
 
     def test_business_detail_successful_get_request(self):
         c = Client()
-        user_id = "1"
+        user_id = User.objects.get(email="business@example.com").id
 
         response = c.get(f'/checkin/business/{user_id}/', HTTP_AUTHORIZATION='Bearer ' + self.access)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
@@ -206,20 +205,20 @@ class BusinessDetailViewTests(TestCase):
             "address": "999 Street St.",
         }
 
-        user_id = "1"
+        user_id = User.objects.get(email="business@example.com").id
         response = c.put(f'/checkin/business/{user_id}/', HTTP_AUTHORIZATION='Bearer ' + self.access, data=data, content_type="application/json")
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(Business.objects.get(user=User.objects.get(id="1")).address, "999 Street St.")
+        self.assertEqual(Business.objects.get(user=User.objects.get(id=user_id)).address, "999 Street St.")
 
     def test_business_detail_successful_delete_request(self):
         c = Client()
-        user_id = "1"
+        user_id = User.objects.get(email="business@example.com").id
 
         response = c.delete(f'/checkin/business/{user_id}/', HTTP_AUTHORIZATION='Bearer ' + self.access)
 
         self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
-        self.assertRaises(ObjectDoesNotExist, Business.objects.get, user=User.objects.get(id="1"))
+        self.assertRaises(ObjectDoesNotExist, Business.objects.get, user=User.objects.get(id=user_id))
 
 
 class ChangePasswordViewTests(TestCase):
@@ -252,12 +251,12 @@ class ChangePasswordViewTests(TestCase):
             "new_password": "newpassword"
         }
 
-        user_id = "1"
+        user_id = User.objects.get(email="customer@example.com").id
         response = c.put(f'/checkin/change_password/{user_id}/', HTTP_AUTHORIZATION='Bearer ' + self.access,
                          data=data, content_type="application/json")
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertTrue(User.objects.get(id="1").check_password("newpassword"))
+        self.assertTrue(User.objects.get(id=user_id).check_password("newpassword"))
 
     def test_change_password_unsuccessful_put_request_wrong_password(self):
         c = Client()
@@ -266,12 +265,12 @@ class ChangePasswordViewTests(TestCase):
             "new_password": "newpassword"
         }
 
-        user_id = "1"
+        user_id = User.objects.get(email="customer@example.com").id
         response = c.put(f'/checkin/change_password/{user_id}/', HTTP_AUTHORIZATION='Bearer ' + self.access,
                          data=data, content_type="application/json")
 
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-        self.assertTrue(User.objects.get(id="1").check_password("password"))
+        self.assertTrue(User.objects.get(id=user_id).check_password("password"))
 
     def test_change_password_unsuccessful_put_request_insufficient_data(self):
         c = Client()
@@ -279,12 +278,12 @@ class ChangePasswordViewTests(TestCase):
             "new_password": "newpassword"
         }
 
-        user_id = "1"
+        user_id = User.objects.get(email="customer@example.com").id
         response = c.put(f'/checkin/change_password/{user_id}/', HTTP_AUTHORIZATION='Bearer ' + self.access,
                          data=data, content_type="application/json")
 
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-        self.assertTrue(User.objects.get(id="1").check_password("password"))
+        self.assertTrue(User.objects.get(id=user_id).check_password("password"))
 
 
 class ChangeEmailViewTests(TestCase):
@@ -316,12 +315,12 @@ class ChangeEmailViewTests(TestCase):
             "email": "customer2@example.com",
         }
 
-        user_id = "1"
+        user_id = User.objects.get(email="customer@example.com").id
         response = c.put(f'/checkin/change_email/{user_id}/', HTTP_AUTHORIZATION='Bearer ' + self.access,
                          data=data, content_type="application/json")
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(User.objects.get(id="1").email, "customer2@example.com")
+        self.assertEqual(User.objects.get(id=user_id).email, "customer2@example.com")
 
     def test_change_password_not_possible_through_this_view(self):
         c = Client()
@@ -329,12 +328,13 @@ class ChangeEmailViewTests(TestCase):
             "password": "newpassword",
         }
 
-        user_id = "1"
+        user_id = User.objects.get(email="customer@example.com").id
         response = c.put(f'/checkin/change_email/{user_id}/', HTTP_AUTHORIZATION='Bearer ' + self.access,
                          data=data, content_type="application/json")
 
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-        self.assertTrue(User.objects.get(id="1").check_password("password"))
+        self.assertTrue(User.objects.get(id=user_id).check_password("password"))
+
 
 class VisitModelTests(TestCase):
     def setUp(self):
@@ -391,8 +391,8 @@ class VisitCreateViewTests(TestCase):
         c = Client()
         data = {
             "dateTime": "2006-10-25 14:30:59",
-            "customer": "1",
-            "business": "2",
+            "customer": User.objects.get(email="user1@example.com").id,
+            "business": User.objects.get(email="business1@example.com").id,
             "numVisitors": "6"
         }
         response = c.post('/checkin/visit/create_visit/', HTTP_AUTHORIZATION='Bearer ' + self.access, data=data, content_type="application/json")
