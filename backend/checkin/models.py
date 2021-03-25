@@ -76,12 +76,6 @@ class Business(models.Model):
     address = models.TextField()
     capacity = models.IntegerField()
 
-    CONTACT_METHODS = [
-        ('E', 'Email'),
-        ('P', 'Phone')
-    ]
-    contact_pref = models.CharField(max_length=1, choices=CONTACT_METHODS, default='P')
-
     def __str__(self):
         return self.name
 

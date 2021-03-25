@@ -23,6 +23,10 @@ class UserSerializer(serializers.ModelSerializer):
         model = User
         fields = ['id', 'email', 'password']
 
+class DeactivateUserSerializer(serializers.Serializer):
+
+    password = serializers.CharField(required=True)
+
 
 class ChangePasswordSerializer(serializers.Serializer):
 
@@ -57,7 +61,7 @@ class BusinessSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Business
-        fields = ['user', 'name', 'phone_num', 'address', 'capacity', 'contact_pref']
+        fields = ['user', 'name', 'phone_num', 'address', 'capacity']
 
     def create(self, validated_data):
         user_data = validated_data.pop('user')
@@ -68,7 +72,6 @@ class BusinessSerializer(serializers.ModelSerializer):
             phone_num=validated_data.pop('phone_num'),
             address=validated_data.pop('address'),
             capacity=validated_data.pop('capacity'))
-
         return business
 
 
