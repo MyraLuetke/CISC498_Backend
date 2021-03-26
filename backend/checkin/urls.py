@@ -20,4 +20,5 @@ urlpatterns = [
     path('checkin/visit/', views.VisitList.as_view()),
     path('checkin/visit/create_visit/', views.VisitCreate.as_view()),
     path('checkin/visit/business_create_visit/', views.BusinessAddedVisitCreate.as_view()),
+    path('checkin/visit/business_create_unregistered_visit/', views.BusinessAddUnregisteredVisitCreate.as_view()),
 ]

@@ -1,7 +1,7 @@
 from rest_framework import serializers
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 
-from .models import Customer, User, Business, Visit
+from .models import Customer, User, Business, Visit, UnregisteredVisit
 
 
 class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
@@ -90,6 +90,27 @@ class VisitSerializer(serializers.ModelSerializer):
             numVisitors=validated_data.pop('numVisitors'))
 
         return visit
+
+
+class BusinessAddedUnregisteredVisitSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = UnregisteredVisit
+        fields = ['dateTime', 'first_name', 'last_name', 'phone_num', 'business', 'numVisitors']
+
+    def create(self, validated_data):
+
+        business = Business.objects.get(user__id=validated_data.pop("business"))
+
+        unregisteredvisit = UnregisteredVisit.objects.create(
+            dateTime=validated_data.pop('dateTime'),
+            first_name=validated_data.pop('first_name'),
+            last_name=validated_data.pop('last_name'),
+            phone_num=validated_data.pop('phone_num'),
+            business=business,
+            numVisitors=validated_data.pop('numVisitors'))
+
+        return unregisteredvisit
 
 
 class BusinessAddedVisitSerializer(serializers.Serializer):
