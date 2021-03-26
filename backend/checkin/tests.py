@@ -5,7 +5,7 @@ from rest_framework.test import APIRequestFactory
 from django.test import Client
 from django.core.exceptions import ObjectDoesNotExist
 
-from .models import User, Customer, Business, Visit
+from .models import User, Customer, Business, Visit, UnregisteredVisit
 from .views import CustomerCreate
 
 
@@ -335,6 +335,124 @@ class ChangeEmailViewTests(TestCase):
 
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertTrue(User.objects.get(id="1").check_password("password"))
+
+
+class UnregisteredVisitModelTests(TestCase):
+    def setUp(self):
+        user11 = User.objects.create(email="business1@example.com", password="test")
+        business1 = Business.objects.create(user=user11, name="Business One", phone_num=1000000000, address="1234 Street St.", capacity=123)
+        UnregisteredVisit.objects.create(dateTime='2006-10-25 14:30:59', first_name="First", last_name="Name", phone_num=1000000001, business=business1, numVisitors=3)
+
+    def test_to_string(self):
+        business1 = Business.objects.get(user=User.objects.get(email="business1@example.com"))
+        visit1 = UnregisteredVisit.objects.get(first_name="First", phone_num=1000000001, business=business1)
+        self.assertEqual(str(visit1), "First Name 1000000001 Business One 2006-10-25 14:30:59")
+
+
+class BusinessAddedVisitCreateTests(TestCase):
+    def setUp(self):
+        c = Client()
+
+        data = {
+            "user":
+                {
+                    "email": "user1@example.com",
+                    "password": "test"
+                },
+            "first_name": "Customer",
+            "last_name": "One",
+            "phone_num": "1000000000"
+        }
+        c.post('/checkin/customer/create_account/', data=data, content_type="application/json")
+
+        data = {
+            "user":
+                {
+                    "email": "business1@example.com",
+                    "password": "test"
+                },
+            "name": "business one",
+            "phone_num": "1000000000",
+            "address": "1234 Street St.",
+            "capacity": 123
+        }
+        c.post('/checkin/business/create_account/', data=data, content_type="application/json")
+
+        data = {
+            "email": "user1@example.com",
+            "password": "test"
+        }
+        response = c.post('/api/token/', data=data, content_type="application/json")
+        self.access = response.json()["access"]
+
+
+    def test_business_add_visit_creation_successful_post_request(self):
+        c = Client()
+        data = {
+            "dateTime": "2006-10-25 14:30:59",
+            "customer": "user1@example.com",
+            "business": User.objects.get(email="business1@example.com").id,
+            "numVisitors": "6"
+        }
+        response = c.post('/checkin/visit/business_create_visit/', HTTP_AUTHORIZATION='Bearer ' + self.access, data=data, content_type="application/json")
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+
+
+    def test_business_add_visit_creation_failed_post_request(self):
+        c = Client()
+        data = {}
+        #i get this for some reason and its coming from this code. so the error message prints in the shell for some reason 
+        #..{'dateTime': [ErrorDetail(string='This field is required.', code='required')], 'customer': [ErrorDetail(string='This field is required.', code='required')], 'business':
+        # [ErrorDetail(string='This field is required.', code='required')], 'numVisitors': [ErrorDetail(string='This field is required.', code='required')]}
+
+        response = c.post('/checkin/visit/business_create_visit/', HTTP_AUTHORIZATION='Bearer ' + self.access, data=data, content_type="application/json")
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
+
+class BusinessAddUnregisteredVisitCreateTests(TestCase):
+    def setUp(self):
+        c = Client()
+
+        data = {
+            "user":
+                {
+                    "email": "business1@example.com",
+                    "password": "test"
+                },
+            "name": "business one",
+            "phone_num": "1000000000",
+            "address": "1234 Street St.",
+            "capacity": 123
+        }
+        c.post('/checkin/business/create_account/', data=data, content_type="application/json")
+
+        data = {
+            "email": "business1@example.com",
+            "password": "test"
+        }
+        response = c.post('/api/token/', data=data, content_type="application/json")
+        self.access = response.json()["access"]
+
+    def test_business_add_unregistered_visit_creation_successful_post_request(self):
+        c = Client()
+        data = {
+            "dateTime": "2006-10-25 14:30:59",
+            "first_name": "Customer",
+            "last_name": "One",
+            "phone_num": 1000000000,
+            "business": User.objects.get(email="business1@example.com").id,
+            "numVisitors": "6"
+        }
+        response = c.post('/checkin/visit/business_create_unregistered_visit/', HTTP_AUTHORIZATION='Bearer ' + self.access, data=data, content_type="application/json")
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+
+    def test_business_add_unregistered_visit_creation_failed_post_request(self):
+        c = Client()
+        data = {}
+
+        response = c.post('/checkin/visit/business_create_unregistered_visit/', HTTP_AUTHORIZATION='Bearer ' + self.access, data=data, content_type="application/json")
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
 
 class VisitModelTests(TestCase):
     def setUp(self):
