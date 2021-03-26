@@ -8,7 +8,7 @@ from rest_framework_simplejwt.views import TokenObtainPairView
 from .models import Customer, User, Business, Visit
 from .serializers import CustomerSerializer, UserSerializer, BusinessSerializer, ChangePasswordSerializer, \
     VisitSerializer, CustomTokenObtainPairSerializer, ChangeEmailSerializer, BusinessAddedVisitSerializer, \
-    BusinessAddedUnregisteredVisitSerializer
+    BusinessAddedUnregisteredVisitSerializer, DeactivateUserSerializer
 
 
 class CustomTokenObtainPairView(TokenObtainPairView):
@@ -24,6 +24,25 @@ class CustomerCreate(mixins.CreateModelMixin,
         if serializer.is_valid():
             serializer.create(validated_data=request.data)
             return Response(serializer.data, status=status.HTTP_201_CREATED)
+        try:
+            if 'user with this email address already exists' in serializer.errors['user']['email'][0] and len(serializer.errors) == 1:
+                user = User.objects.get(email=serializer.data['user']['email'])
+                if user.is_active:
+                    return Response(serializer.error_messages, status=status.HTTP_400_BAD_REQUEST)
+                else:
+                    user.is_active = True
+                    user.set_password(serializer.data.get("user").get("password"))
+                    customer = Customer.objects.get(user=user)
+                    customer.first_name = serializer.data.get("first_name")
+                    customer.last_name = serializer.data.get("last_name")
+                    customer.phone_num = serializer.data.get("phone_num")
+                    customer.contact_pref = serializer.data.get("contact_pref")
+                    user.is_customer = True
+                    user.save()
+                    customer.save()
+                    return Response(serializer.data, status=status.HTTP_201_CREATED)
+        except TypeError:
+            return Response(serializer.error_messages, status=status.HTTP_400_BAD_REQUEST)
         return Response(serializer.error_messages, status=status.HTTP_400_BAD_REQUEST)
 
 
@@ -53,7 +72,15 @@ class CustomerDetail(mixins.RetrieveModelMixin,
         return self.partial_update(request, *args, **kwargs)
 
     def delete(self, request, *args, **kwargs):
-        return self.destroy(request, *args, **kwargs)
+        user = self.get_object().user
+        serializer = DeactivateUserSerializer(data=request.data)
+        if serializer.is_valid():
+            if not user.check_password(serializer.data.get("password")):
+                return Response(serializer.error_messages, status=status.HTTP_400_BAD_REQUEST)
+            user.is_active = False
+            user.save()
+            return Response(status=status.HTTP_200_OK)
+        return Response(serializer.error_messages, status=status.HTTP_400_BAD_REQUEST)
 
 
 class BusinessCreate(mixins.CreateModelMixin,
@@ -65,6 +92,25 @@ class BusinessCreate(mixins.CreateModelMixin,
         if serializer.is_valid():
             serializer.create(validated_data=request.data)
             return Response(serializer.data, status=status.HTTP_201_CREATED)
+        try:
+            if 'user with this email address already exists' in serializer.errors['user']['email'][0] and len(serializer.errors) == 1:
+                user = User.objects.get(email=serializer.data['user']['email'])
+                if user.is_active:
+                    return Response(serializer.error_messages, status=status.HTTP_400_BAD_REQUEST)
+                else:
+                    user.is_active = True
+                    user.set_password(serializer.data.get("user").get("password"))
+                    business = Business.objects.get(user=user)
+                    business.name = serializer.data.get("name")
+                    business.phone_num = serializer.data.get("phone_num")
+                    business.address = serializer.data.get("address")
+                    business.capacity = serializer.data.get("capacity")
+                    business.contact_pref = serializer.data.get("contact_pref")
+                    user.save()
+                    business.save()
+                    return Response(serializer.data, status=status.HTTP_201_CREATED)
+        except TypeError:
+            return Response(serializer.error_messages, status=status.HTTP_400_BAD_REQUEST)
         return Response(serializer.error_messages, status=status.HTTP_400_BAD_REQUEST)
 
 
@@ -94,8 +140,15 @@ class BusinessDetail(mixins.RetrieveModelMixin,
         return self.partial_update(request, *args, **kwargs,)
 
     def delete(self, request, *args, **kwargs):
-        return self.destroy(request, *args, **kwargs)
-
+        user = self.get_object().user
+        serializer = DeactivateUserSerializer(data=request.data)
+        if serializer.is_valid():
+            if not user.check_password(serializer.data.get("password")):
+                return Response(serializer.error_messages, status=status.HTTP_400_BAD_REQUEST)
+            user.is_active = False
+            user.save()
+            return Response(status=status.HTTP_200_OK)
+        return Response(serializer.error_messages, status=status.HTTP_400_BAD_REQUEST)
 
 class ChangePassword(mixins.UpdateModelMixin, generics.GenericAPIView):
     queryset = User.objects.all()
@@ -154,7 +207,6 @@ class BusinessAddedVisitCreate(mixins.CreateModelMixin, APIView):
         if serializer.is_valid():
             serializer.create(validated_data=request.data)
             return Response(serializer.data, status=status.HTTP_201_CREATED)
-        print(serializer.errors)
         return Response(serializer.error_messages, status=status.HTTP_400_BAD_REQUEST)
 
 

@@ -38,12 +38,12 @@ class UserModelTests(TestCase):
 class CustomerModelTests(TestCase):
     def setUp(self):
         user1 = User.objects.create(email="user1@example.com", password="test")
-        Customer.objects.create(user=user1, first_name="Customer", last_name="One", phone_num=1000000000)
+        Customer.objects.create(user=user1, first_name="Customer", last_name="One", phone_num=1000000000, contact_pref="P")
 
     def test_unique_customers(self):
         user1 = User.objects.get(email="user1@example.com")
         self.assertRaises(IntegrityError, Customer.objects.create, user=user1, first_name="Customer", last_name="Two",
-                          phone_num=2000000000)
+                          phone_num=2000000000, contact_pref="E")
 
     def test_to_string(self):
         customer1 = Customer.objects.get(user=User.objects.get(email="user1@example.com"))
@@ -61,7 +61,8 @@ class CustomerCreateViewTests(TestCase):
             },
             "first_name": "Customer",
             "last_name": "One",
-            "phone_num": 1000000000
+            "phone_num": 1000000000,
+            "contact_pref": 'P'
         }
 
         response = c.post('/checkin/customer/create_account/', data=data, content_type="application/json")
@@ -75,6 +76,43 @@ class CustomerCreateViewTests(TestCase):
         response = c.post('/checkin/customer/create_account/', data=data, content_type="application/json")
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
+    def test_customer_creation_after_user_deactivation(self):
+        c = Client()
+
+        data = {
+            "user":
+            {
+                "email": "user1@example.com",
+                "password": "test"
+            },
+            "first_name": "Customer",
+            "last_name": "One",
+            "phone_num": 1000000000,
+            "contact_pref": 'P'
+        }
+        response = c.post('/checkin/customer/create_account/', data=data, content_type="application/json")
+
+        user = User.objects.get(email="user1@example.com")
+        user.is_active = False
+        user.save()
+
+        data = {
+            "user":
+                {
+                    "email": "user1@example.com",
+                    "password": "testing"
+                },
+            "first_name": "Customer",
+            "last_name": "OneAgain",
+            "phone_num": 1000000001,
+            "contact_pref": 'E'
+        }
+
+        response = c.post('/checkin/customer/create_account/', data=data, content_type="application/json")
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        self.assertEqual(User.objects.get(email="user1@example.com").is_customer, True)
+        self.assertEqual(Customer.objects.get(user=User.objects.get(email="user1@example.com")).last_name, "OneAgain")
+
 
 class CustomerDetailViewTests(TestCase):
     def setUp(self):
@@ -87,7 +125,8 @@ class CustomerDetailViewTests(TestCase):
                 },
             "first_name": "User",
             "last_name": "One",
-            "phone_num": "1111111111"
+            "phone_num": "1111111111",
+            "contact_pref": 'P'
         }
         c.post('/checkin/customer/create_account/', data=data, content_type="application/json")
 
@@ -122,11 +161,14 @@ class CustomerDetailViewTests(TestCase):
         c = Client()
         user_id = User.objects.get(email="user1@example.com").id
 
-        response = c.delete(f'/checkin/customer/{user_id}/', HTTP_AUTHORIZATION='Bearer ' + self.access)
+        data = {
+            "password": "password",
+        }
+        response = c.delete(f'/checkin/customer/{user_id}/', HTTP_AUTHORIZATION='Bearer ' + self.access, data=data,
+                            content_type="application/json")
 
-        self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
-        self.assertRaises(ObjectDoesNotExist, Customer.objects.get, user=User.objects.get(id=user_id))
-
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(User.objects.get(id=user_id).is_active, False)
 
 class BusinessModelTests(TestCase):
     def setUp(self):
@@ -154,7 +196,7 @@ class BusinessCreateViewTests(TestCase):
             "name": "business1",
             "phone_num": "1111111111",
             "address": "1234 Street St.",
-            "capacity": 123
+            "capacity": 123,
         }
 
         response = c.post('/checkin/business/create_account/', data=data, content_type="application/json")
@@ -167,6 +209,43 @@ class BusinessCreateViewTests(TestCase):
 
         response = c.post('/checkin/business/create_account/', data=data, content_type="application/json")
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
+    def test_business_creation_after_user_deactivation(self):
+        c = Client()
+
+        data = {
+            "user":
+            {
+                "email": "business@example.com",
+                "password": "password"
+            },
+            "name": "business1",
+            "phone_num": "1111111111",
+            "address": "1234 Street St.",
+            "capacity": 123,
+        }
+        response = c.post('/checkin/business/create_account/', data=data, content_type="application/json")
+
+        user = User.objects.get(email="business@example.com")
+        user.is_active = False
+        user.save()
+
+        data = {
+            "user":
+            {
+                "email": "business@example.com",
+                "password": "password1"
+            },
+            "name": "business11",
+            "phone_num": "1111111112",
+            "address": "1233 Street St.",
+            "capacity": 120,
+        }
+
+        response = c.post('/checkin/business/create_account/', data=data, content_type="application/json")
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        self.assertEqual(User.objects.get(email="business@example.com").is_customer, False)
+        self.assertEqual(Business.objects.get(user=User.objects.get(email="business@example.com")).name, "business11")
 
 
 class BusinessDetailViewTests(TestCase):
@@ -181,7 +260,7 @@ class BusinessDetailViewTests(TestCase):
             "name": "business1",
             "phone_num": "1111111111",
             "address": "1234 Street St.",
-            "capacity": 123
+            "capacity": 123,
         }
         c.post('/checkin/business/create_account/', data=data, content_type="application/json")
 
@@ -201,7 +280,7 @@ class BusinessDetailViewTests(TestCase):
 
     def test_business_detail_successful_put_request(self):
         c = Client()
-        data = data = {
+        data = {
             "address": "999 Street St.",
         }
 
@@ -215,10 +294,15 @@ class BusinessDetailViewTests(TestCase):
         c = Client()
         user_id = User.objects.get(email="business@example.com").id
 
-        response = c.delete(f'/checkin/business/{user_id}/', HTTP_AUTHORIZATION='Bearer ' + self.access)
+        data = {
+            "password": "password",
+        }
 
-        self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
-        self.assertRaises(ObjectDoesNotExist, Business.objects.get, user=User.objects.get(id=user_id))
+        response = c.delete(f'/checkin/business/{user_id}/', HTTP_AUTHORIZATION='Bearer ' + self.access, data=data,
+                            content_type="application/json")
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(User.objects.get(id=user_id).is_active, False)
 
 
 class ChangePasswordViewTests(TestCase):
@@ -233,7 +317,8 @@ class ChangePasswordViewTests(TestCase):
                 },
             "first_name": "Customer",
             "last_name": "One",
-            "phone_num": "1111111111"
+            "phone_num": "1111111111",
+            "contact_pref": 'P'
         }
         c.post('/checkin/customer/create_account/', data=data, content_type="application/json")
 
@@ -298,7 +383,8 @@ class ChangeEmailViewTests(TestCase):
                 },
             "first_name": "Customer",
             "last_name": "One",
-            "phone_num": "1111111111"
+            "phone_num": "1111111111",
+            "contact_pref": 'P'
         }
         c.post('/checkin/customer/create_account/', data=data, content_type="application/json")
 
@@ -481,7 +567,8 @@ class VisitCreateViewTests(TestCase):
                 },
             "first_name": "Customer",
             "last_name": "One",
-            "phone_num": "1000000000"
+            "phone_num": "1000000000",
+            "contact_pref": 'P'
         }
         c.post('/checkin/customer/create_account/', data=data, content_type="application/json")
 
@@ -494,7 +581,7 @@ class VisitCreateViewTests(TestCase):
             "name": "business one",
             "phone_num": "1000000000",
             "address": "1234 Street St.",
-            "capacity": 123
+            "capacity": 123,
         }
         c.post('/checkin/business/create_account/', data=data, content_type="application/json")
 

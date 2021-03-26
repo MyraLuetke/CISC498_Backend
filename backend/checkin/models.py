@@ -51,7 +51,7 @@ class User(AbstractUser):
 
     objects = UserManager()
 
-    is_customer = models.BooleanField(default=False)
+    is_customer = models.BooleanField(default=False) 
 
 
 class Customer(models.Model):
@@ -61,6 +61,12 @@ class Customer(models.Model):
     phone_num = models.CharField(max_length=11)
     created_date = models.DateTimeField(auto_now_add=True)
     email_verification = models.BooleanField(default=False)
+
+    CONTACT_METHODS = [
+        ('E', 'Email'),
+        ('P', 'Phone')
+    ]
+    contact_pref = models.CharField(max_length=1, choices=CONTACT_METHODS, default='P')
 
     def __str__(self):
         return self.first_name + ' ' + self.last_name
