@@ -52,12 +52,6 @@ class CustomerSerializer(serializers.ModelSerializer):
         return customer
 
 
-class CustomerEmailSerializer(serializers.Serializer):
-    def create(self, validated_data):
-        cust = Customer.objects.get(user__email=validated_data.pop("customer"))
-        return cust
-
-
 class BusinessSerializer(serializers.ModelSerializer):
     user = UserSerializer(required=True)
 
@@ -76,6 +70,7 @@ class BusinessSerializer(serializers.ModelSerializer):
             capacity=validated_data.pop('capacity'))
 
         return business
+
 
 class BusinessAddVisitSerializer(serializers.ModelSerializer):
     class Meta:
@@ -114,6 +109,7 @@ class BusinessAddUnregisteredVisitSerializer(serializers.ModelSerializer):
             numVisitors=validated_data.pop('numVisitors'))
 
         return unregisteredVisit
+
 
 class VisitSerializer(serializers.ModelSerializer):
 

@@ -8,7 +8,7 @@ from rest_framework_simplejwt.views import TokenObtainPairView
 from .models import Customer, User, Business, Visit
 
 from .serializers import CustomerSerializer, UserSerializer, BusinessSerializer, ChangePasswordSerializer, \
-    BusinessAddVisitSerializer, BusinessAddUnregisteredVisitSerializer, CustomerEmailSerializer, VisitSerializer, \
+    BusinessAddVisitSerializer, BusinessAddUnregisteredVisitSerializer, VisitSerializer, \
     CustomTokenObtainPairSerializer, ChangeEmailSerializer
 
 
@@ -54,18 +54,6 @@ class CustomerDetail(mixins.RetrieveModelMixin,
     def delete(self, request, *args, **kwargs):
         return self.destroy(request, *args, **kwargs)
 
-
-'''NOT SURE????????????????'''
-class CustomerDetailEmail(mixins.CreateModelMixin, APIView):
-    permission_classes = (IsAuthenticated,)
-
-    def post(self, request, *args, **kwargs):
-        serializer = CustomerEmailSerializer(data=request.data)
-        if serializer.is_valid():
-            '''dont need this right?'''
-            #serializer.create(validated_data=request.data)
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-        return Response(serializer.error_messages, status=status.HTTP_400_BAD_REQUEST)
 
 class BusinessCreate(mixins.CreateModelMixin,APIView):
     permission_classes = (AllowAny,)
@@ -143,6 +131,7 @@ class ChangeEmail(mixins.UpdateModelMixin, generics.GenericAPIView):
             user.save()
             return Response(serializer.data, status=status.HTTP_200_OK)
         return Response(serializer.error_messages, status=status.HTTP_400_BAD_REQUEST)
+
 
 #I think the issue might be with APIView
 class BusinessAddVisitCreate(mixins.CreateModelMixin, APIView):

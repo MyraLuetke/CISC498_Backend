@@ -5,7 +5,7 @@ from rest_framework.test import APIRequestFactory
 from django.test import Client
 from django.core.exceptions import ObjectDoesNotExist
 
-from .models import User, Customer, Business, Visit
+from .models import User, Customer, Business, Visit, UnregisteredVisit
 from .views import CustomerCreate
 
 
@@ -337,6 +337,18 @@ class ChangeEmailViewTests(TestCase):
         self.assertTrue(User.objects.get(id="1").check_password("password"))
 
 
+class UnregisteredVisitModelTests(TestCase):
+    def setUp(self):
+        user11 = User.objects.create(email="business1@example.com", password="test")
+        business1 = Business.objects.create(user=user11, name="Business One", phone_num=1000000000, address="1234 Street St.", capacity=123)
+        UnregisteredVisit.objects.create(dateTime='2006-10-25 14:30:59', first_name="First", last_name="Name", phone_num=1000000001, business=business1, numVisitors=3)
+
+    def test_to_string(self):
+        business1 = Business.objects.get(user=User.objects.get(email="business1@example.com"))
+        visit1 = UnregisteredVisit.objects.get(first_name="First", phone_num=1000000001, business=business1)
+        self.assertEqual(str(visit1), "First Name 1000000001 Business One 2006-10-25 14:30:59")
+
+
 class BusinessAddVisitCreateTests(TestCase):
     def setUp(self):
         c = Client()
@@ -382,14 +394,14 @@ class BusinessAddVisitCreateTests(TestCase):
             #"business": User.objects.get(email="business1@example.com").id,
             "numVisitors": "6"
         }
-        response = c.post('checkin/business/checkin_customer/', HTTP_AUTHORIZATION='Bearer ' + self.access, data=data, content_type="application/json")
+        response = c.post('/checkin/business/checkin_customer/', HTTP_AUTHORIZATION='Bearer ' + self.access, data=data, content_type="application/json")
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
 
-    def test_visit_creation_failed_post_request(self):
+    def test_business_add_visit_creation_failed_post_request(self):
         c = Client()
         data = {}
 
-        response = c.post('/checkin/visit/create_visit/', HTTP_AUTHORIZATION='Bearer ' + self.access, data=data, content_type="application/json")
+        response = c.post('/checkin/business/checkin_customer/', HTTP_AUTHORIZATION='Bearer ' + self.access, data=data, content_type="application/json")
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
 
