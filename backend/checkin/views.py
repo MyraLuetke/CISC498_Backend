@@ -7,7 +7,8 @@ from rest_framework_simplejwt.views import TokenObtainPairView
 
 from .models import Customer, User, Business, Visit
 from .serializers import CustomerSerializer, UserSerializer, BusinessSerializer, ChangePasswordSerializer, \
-    VisitSerializer, CustomTokenObtainPairSerializer, ChangeEmailSerializer, DeactivateUserSerializer
+    VisitSerializer, CustomTokenObtainPairSerializer, ChangeEmailSerializer, BusinessAddedVisitSerializer, \
+    BusinessAddedUnregisteredVisitSerializer, DeactivateUserSerializer
 
 
 class CustomTokenObtainPairView(TokenObtainPairView):
@@ -192,6 +193,29 @@ class VisitCreate(mixins.CreateModelMixin, APIView):
 
     def post(self, request, *args, **kwargs):
         serializer = VisitSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.create(validated_data=request.data)
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.error_messages, status=status.HTTP_400_BAD_REQUEST)
+
+
+class BusinessAddedVisitCreate(mixins.CreateModelMixin, APIView):
+    permission_classes = (IsAuthenticated,)
+
+    def post(self, request, *args, **kwargs):
+        serializer = BusinessAddedVisitSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.create(validated_data=request.data)
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        print(serializer.errors)
+        return Response(serializer.error_messages, status=status.HTTP_400_BAD_REQUEST)
+
+
+class BusinessAddUnregisteredVisitCreate(mixins.CreateModelMixin, APIView):
+    permission_classes = (IsAuthenticated,)
+
+    def post(self, request, *args, **kwargs):
+        serializer = BusinessAddedUnregisteredVisitSerializer(data=request.data)
         if serializer.is_valid():
             serializer.create(validated_data=request.data)
             return Response(serializer.data, status=status.HTTP_201_CREATED)
