@@ -90,3 +90,23 @@ class VisitSerializer(serializers.ModelSerializer):
             numVisitors=validated_data.pop('numVisitors'))
 
         return visit
+
+
+class BusinessAddedVisitSerializer(serializers.Serializer):
+
+    dateTime = serializers.DateTimeField(required=True)
+    customer = serializers.CharField(required=True)
+    business = serializers.CharField(required=True)
+    numVisitors = serializers.IntegerField(required=True)
+
+    def create(self, validated_data):
+        customer = Customer.objects.get(user__email=validated_data.pop("customer"))
+        business = Business.objects.get(user__id=validated_data.pop("business"))
+
+        visit = Visit.objects.create(
+            dateTime=validated_data.pop('dateTime'),
+            customer=customer,
+            business=business,
+            numVisitors=validated_data.pop('numVisitors'))
+
+        return visit
