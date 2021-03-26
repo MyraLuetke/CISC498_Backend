@@ -92,7 +92,7 @@ class CustomerCreateViewTests(TestCase):
         }
         response = c.post('/checkin/customer/create_account/', data=data, content_type="application/json")
 
-        user = User.objects.get(id="1")
+        user = User.objects.get(email="user1@example.com")
         user.is_active = False
         user.save()
 
@@ -226,7 +226,7 @@ class BusinessCreateViewTests(TestCase):
         }
         response = c.post('/checkin/business/create_account/', data=data, content_type="application/json")
 
-        user = User.objects.get(id="1")
+        user = User.objects.get(email="business@example.com")
         user.is_active = False
         user.save()
 

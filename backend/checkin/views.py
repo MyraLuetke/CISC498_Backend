@@ -207,7 +207,6 @@ class BusinessAddedVisitCreate(mixins.CreateModelMixin, APIView):
         if serializer.is_valid():
             serializer.create(validated_data=request.data)
             return Response(serializer.data, status=status.HTTP_201_CREATED)
-        print(serializer.errors)
         return Response(serializer.error_messages, status=status.HTTP_400_BAD_REQUEST)
 
 
