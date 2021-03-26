@@ -74,7 +74,7 @@ class Business(models.Model):
         return self.name
 
 
-class BusinessAddVisit(models.Model):
+class UnregisteredVisit(models.Model):
     dateTime = models.DateTimeField(auto_now_add=False)
     first_name = models.CharField(max_length=100)
     last_name = models.CharField(max_length=100)
@@ -83,7 +83,7 @@ class BusinessAddVisit(models.Model):
     numVisitors = models.IntegerField()
 
     def __str__(self):
-        return self.first_name + ' ' + self.last_name + ' ' + self.phone_num + ' ' + self.business.__str__() +' ' + self.dateTime.__str__()
+        return self.first_name + ' ' + self.last_name + ' ' + self.phone_num + ' ' + self.business.__str__() + ' ' + self.dateTime.__str__()
 
 
 class Visit(models.Model):
@@ -93,4 +93,4 @@ class Visit(models.Model):
     numVisitors = models.IntegerField()
 
     def __str__(self):
-        return self.customer.__str__() + ' ' + self.business.__str__() +' ' + self.dateTime.__str__()
+        return self.customer.__str__() + ' ' + self.business.__str__() + ' ' + self.dateTime.__str__()

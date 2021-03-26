@@ -336,6 +336,63 @@ class ChangeEmailViewTests(TestCase):
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertTrue(User.objects.get(id="1").check_password("password"))
 
+
+class BusinessAddVisitCreateTests(TestCase):
+    def setUp(self):
+        c = Client()
+
+        data = {
+            "user":
+                {
+                    "email": "user1@example.com",
+                    "password": "test"
+                },
+            "first_name": "Customer",
+            "last_name": "One",
+            "phone_num": "1000000000"
+        }
+        c.post('/checkin/customer/create_account/', data=data, content_type="application/json")
+
+        data = {
+            "user":
+                {
+                    "email": "business1@example.com",
+                    "password": "test"
+                },
+            "name": "business one",
+            "phone_num": "1000000000",
+            "address": "1234 Street St.",
+            "capacity": 123
+        }
+        c.post('/checkin/business/create_account/', data=data, content_type="application/json")
+
+        data = {
+            "email": "user1@example.com",
+            "password": "test"
+        }
+        response = c.post('/api/token/', data=data, content_type="application/json")
+        self.access = response.json()["access"]
+
+    def test_business_add_visit_creation_successful_post_request(self):
+        c = Client()
+        data = {
+            "dateTime": "2006-10-25 14:30:59",
+            "customer": "user1@example.com",
+            "business": "2",
+            #"business": User.objects.get(email="business1@example.com").id,
+            "numVisitors": "6"
+        }
+        response = c.post('checkin/business/checkin_customer/', HTTP_AUTHORIZATION='Bearer ' + self.access, data=data, content_type="application/json")
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+
+    def test_visit_creation_failed_post_request(self):
+        c = Client()
+        data = {}
+
+        response = c.post('/checkin/visit/create_visit/', HTTP_AUTHORIZATION='Bearer ' + self.access, data=data, content_type="application/json")
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
+
 class VisitModelTests(TestCase):
     def setUp(self):
         user1 = User.objects.create(email="user1@example.com", password="test")

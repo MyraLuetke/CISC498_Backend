@@ -1,7 +1,7 @@
 from rest_framework import serializers
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 
-from .models import Customer, User, Business, Visit, BusinessAddVisit
+from .models import Customer, User, Business, Visit, UnregisteredVisit
 
 
 class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
@@ -52,6 +52,12 @@ class CustomerSerializer(serializers.ModelSerializer):
         return customer
 
 
+class CustomerEmailSerializer(serializers.Serializer):
+    def create(self, validated_data):
+        cust = Customer.objects.get(user__email=validated_data.pop("customer"))
+        return cust
+
+
 class BusinessSerializer(serializers.ModelSerializer):
     user = UserSerializer(required=True)
 
@@ -74,21 +80,40 @@ class BusinessSerializer(serializers.ModelSerializer):
 class BusinessAddVisitSerializer(serializers.ModelSerializer):
     class Meta:
         model = Visit
-        fields = ['dateTime', 'customer', 'business', 'numVisitors', 'addedBy']
+        fields = ['dateTime', 'customer', 'business', 'numVisitors']
 
     def create(self, validated_data):
 
-        customer = Customer.objects.get(user__id=validated_data.pop("customer"))
+        customer = Customer.objects.get(user__email=validated_data.pop("customer"))
         business = Business.objects.get(user__id=validated_data.pop("business"))
 
-        visit = Visit.objects.create(
+        businessAddVisit = Visit.objects.create(
             dateTime=validated_data.pop('dateTime'),
             customer=customer,
             business=business,
-            numVisitors=validated_data.pop('numVisitors'),
-            addedBy="business")
+            numVisitors=validated_data.pop('numVisitors'))
 
-        return visit
+        return businessAddVisit
+
+
+class BusinessAddUnregisteredVisitSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = UnregisteredVisit
+        fields = ['dateTime', 'first_name', 'last_name', 'phone_num', 'business', 'numVisitors']
+
+    def create(self, validated_data):
+        business = Business.objects.get(user__id=validated_data.pop("business"))
+
+        unregisteredVisit = UnregisteredVisit.objects.create(
+            dateTime=validated_data.pop('dateTime'),
+            first_name=validated_data.pop('first_name'),
+            last_name=validated_data.pop('last_name'),
+            phone_num=validated_data.pop('phone_num'),
+            business=business,
+            numVisitors=validated_data.pop('numVisitors'))
+
+        return unregisteredVisit
 
 class VisitSerializer(serializers.ModelSerializer):
 
