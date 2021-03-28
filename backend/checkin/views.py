@@ -28,7 +28,7 @@ class CustomerCreate(mixins.CreateModelMixin,
             if 'user with this email address already exists' in serializer.errors['user']['email'][0] and len(serializer.errors) == 1:
                 user = User.objects.get(email=serializer.data['user']['email'])
                 if user.is_active:
-                    return Response(serializer.error_messages, status=status.HTTP_400_BAD_REQUEST)
+                    return Response(serializer.error_messages, status=status.HTTP_403_FORBIDDEN)
                 else:
                     user.is_active = True
                     user.set_password(serializer.data.get("user").get("password"))
@@ -96,7 +96,7 @@ class BusinessCreate(mixins.CreateModelMixin,
             if 'user with this email address already exists' in serializer.errors['user']['email'][0] and len(serializer.errors) == 1:
                 user = User.objects.get(email=serializer.data['user']['email'])
                 if user.is_active:
-                    return Response(serializer.error_messages, status=status.HTTP_400_BAD_REQUEST)
+                    return Response(serializer.error_messages, status=status.HTTP_403_FORBIDDEN)
                 else:
                     user.is_active = True
                     user.set_password(serializer.data.get("user").get("password"))
