@@ -1,0 +1,11 @@
+# "docker-compose up" to build the image and run the container
+
+version: '3'
+
+services:
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "8000:8000"
