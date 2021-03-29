@@ -61,7 +61,7 @@ class BusinessSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Business
-        fields = ['user', 'name', 'phone_num', 'address', 'capacity']
+        fields = ['user', 'name', 'phone_num', 'street_address', 'city', 'postal_code', 'province', 'capacity']
 
     def create(self, validated_data):
         user_data = validated_data.pop('user')
@@ -70,7 +70,10 @@ class BusinessSerializer(serializers.ModelSerializer):
             user=user,
             name=validated_data.pop('name'),
             phone_num=validated_data.pop('phone_num'),
-            address=validated_data.pop('address'),
+            street_address=validated_data.pop('street_address'),
+            city=validated_data.pop('city'),
+            postal_code=validated_data.pop('postal_code'),
+            province=validated_data.pop('province'),
             capacity=validated_data.pop('capacity'))
         return business
 
