@@ -147,7 +147,8 @@ class CustomerDetailViewTests(TestCase):
     def test_customer_detail_successful_put_request(self):
         c = Client()
         data = {
-            "phone_num": "0000000000"
+            "phone_num": "0000000000",
+            "contact_pref": "E"
         }
 
         user_id = User.objects.get(email="user1@example.com").id
@@ -156,6 +157,7 @@ class CustomerDetailViewTests(TestCase):
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(Customer.objects.get(user=User.objects.get(id=user_id)).phone_num, "0000000000")
+        self.assertEqual(Customer.objects.get(user=User.objects.get(id=user_id)).contact_pref, "E")
 
     def test_customer_detail_successful_delete_request(self):
         c = Client()
@@ -465,7 +467,8 @@ class BusinessAddedVisitCreateTests(TestCase):
                 },
             "first_name": "Customer",
             "last_name": "One",
-            "phone_num": "1000000000"
+            "phone_num": "1000000000",
+            "contact_pref": "E"
         }
         c.post('/checkin/customer/create_account/', data=data, content_type="application/json")
 
