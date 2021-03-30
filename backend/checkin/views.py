@@ -23,7 +23,7 @@ class CustomerCreate(mixins.CreateModelMixin,
         serializer = CustomerSerializer(data=request.data)
         if serializer.is_valid():
             serializer.create(validated_data=request.data)
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
+            return Response(status=status.HTTP_201_CREATED)
         try:
             if 'user with this email address already exists' in serializer.errors['user']['email'][0] and len(serializer.errors) == 1:
                 user = User.objects.get(email=serializer.data['user']['email'])
@@ -40,7 +40,7 @@ class CustomerCreate(mixins.CreateModelMixin,
                     user.is_customer = True
                     user.save()
                     customer.save()
-                    return Response(serializer.data, status=status.HTTP_201_CREATED)
+                    return Response(status=status.HTTP_201_CREATED)
         except TypeError:
             return Response(serializer.error_messages, status=status.HTTP_400_BAD_REQUEST)
         return Response(serializer.error_messages, status=status.HTTP_400_BAD_REQUEST)
@@ -91,7 +91,7 @@ class BusinessCreate(mixins.CreateModelMixin,
         serializer = BusinessSerializer(data=request.data)
         if serializer.is_valid():
             serializer.create(validated_data=request.data)
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
+            return Response(status=status.HTTP_201_CREATED)
         try:
             if 'user with this email address already exists' in serializer.errors['user']['email'][0] and len(serializer.errors) == 1:
                 user = User.objects.get(email=serializer.data['user']['email'])
@@ -108,7 +108,7 @@ class BusinessCreate(mixins.CreateModelMixin,
                     business.contact_pref = serializer.data.get("contact_pref")
                     user.save()
                     business.save()
-                    return Response(serializer.data, status=status.HTTP_201_CREATED)
+                    return Response(status=status.HTTP_201_CREATED)
         except TypeError:
             return Response(serializer.error_messages, status=status.HTTP_400_BAD_REQUEST)
         return Response(serializer.error_messages, status=status.HTTP_400_BAD_REQUEST)
@@ -167,7 +167,7 @@ class ChangePassword(mixins.UpdateModelMixin, generics.GenericAPIView):
             # set_password also hashes the password that the user will get
             user.set_password(serializer.data.get("new_password"))
             user.save()
-            return Response(serializer.data, status=status.HTTP_200_OK)
+            return Response(status=status.HTTP_200_OK)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
