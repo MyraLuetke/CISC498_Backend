@@ -173,11 +173,14 @@ class CustomerDetailViewTests(TestCase):
 class BusinessModelTests(TestCase):
     def setUp(self):
         user1 = User.objects.create(email="business1@example.com", password="test")
-        Business.objects.create(user=user1, name="Business One", phone_num=1000000000, address="1234 Street St.", capacity=123)
+        Business.objects.create(user=user1, name="Business One", phone_num=1000000000, street_address="1234 Street St.",
+                                city="City", postal_code="E4X 2M1", province="Ontario", capacity=123)
 
     def test_unique_businesses(self):
         user1 = User.objects.get(email="business1@example.com")
-        self.assertRaises(IntegrityError, Business.objects.create, user=user1, name="Business Two", phone_num=2000000000, address="1235 Street St.", capacity=123)
+        self.assertRaises(IntegrityError, Business.objects.create, user=user1, name="Business Two",
+                          phone_num=2000000000, street_address="3334 Street Ave.", city="Town",
+                          postal_code="R4S 6M5", province="Ontario", capacity=123)
 
     def test_to_string(self):
         business1 = Business.objects.get(user=User.objects.get(email="business1@example.com"))
@@ -195,7 +198,10 @@ class BusinessCreateViewTests(TestCase):
                 },
             "name": "business1",
             "phone_num": "1111111111",
-            "address": "1234 Street St.",
+            "street_address": "1234 Street St.",
+            "city": "City",
+            "postal_code": "E4X 2M1",
+            "province": "Ontario",
             "capacity": 123,
         }
 
@@ -221,7 +227,10 @@ class BusinessCreateViewTests(TestCase):
             },
             "name": "business1",
             "phone_num": "1111111111",
-            "address": "1234 Street St.",
+            "street_address": "1234 Street St.",
+            "city": "City",
+            "postal_code": "E4X 2M1",
+            "province": "Ontario",
             "capacity": 123,
         }
         response = c.post('/checkin/business/create_account/', data=data, content_type="application/json")
@@ -238,7 +247,10 @@ class BusinessCreateViewTests(TestCase):
             },
             "name": "business11",
             "phone_num": "1111111112",
-            "address": "1233 Street St.",
+            "street_address": "14 Ave St.",
+            "city": "Town",
+            "postal_code": "C4X 2M1",
+            "province": "Ontario",
             "capacity": 120,
         }
 
@@ -259,7 +271,10 @@ class BusinessDetailViewTests(TestCase):
                 },
             "name": "business1",
             "phone_num": "1111111111",
-            "address": "1234 Street St.",
+            "street_address": "1234 Street St.",
+            "city": "City",
+            "postal_code": "E4X 2M1",
+            "province": "Ontario",
             "capacity": 123,
         }
         c.post('/checkin/business/create_account/', data=data, content_type="application/json")
@@ -281,14 +296,14 @@ class BusinessDetailViewTests(TestCase):
     def test_business_detail_successful_put_request(self):
         c = Client()
         data = {
-            "address": "999 Street St.",
+            "street_address": "999 Street St.",
         }
 
         user_id = User.objects.get(email="business@example.com").id
         response = c.put(f'/checkin/business/{user_id}/', HTTP_AUTHORIZATION='Bearer ' + self.access, data=data, content_type="application/json")
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(Business.objects.get(user=User.objects.get(id=user_id)).address, "999 Street St.")
+        self.assertEqual(Business.objects.get(user=User.objects.get(id=user_id)).street_address, "999 Street St.")
 
     def test_business_detail_successful_delete_request(self):
         c = Client()
@@ -426,8 +441,11 @@ class ChangeEmailViewTests(TestCase):
 class UnregisteredVisitModelTests(TestCase):
     def setUp(self):
         user11 = User.objects.create(email="business1@example.com", password="test")
-        business1 = Business.objects.create(user=user11, name="Business One", phone_num=1000000000, address="1234 Street St.", capacity=123)
-        UnregisteredVisit.objects.create(dateTime='2006-10-25 14:30:59', first_name="First", last_name="Name", phone_num=1000000001, business=business1, numVisitors=3)
+        business1 = Business.objects.create(user=user11, name="Business One", phone_num=1000000000,
+                                            street_address="1234 Street St.", city="City", postal_code="E4X 2M1",
+                                            province="Ontario", capacity=123)
+        UnregisteredVisit.objects.create(dateTime='2006-10-25 14:30:59', first_name="First", last_name="Name",
+                                         phone_num=1000000001, business=business1, numVisitors=3)
 
     def test_to_string(self):
         business1 = Business.objects.get(user=User.objects.get(email="business1@example.com"))
@@ -459,7 +477,10 @@ class BusinessAddedVisitCreateTests(TestCase):
                 },
             "name": "business one",
             "phone_num": "1000000000",
-            "address": "1234 Street St.",
+            "street_address": "1234 Street St.",
+            "city": "City",
+            "postal_code": "E4X 2M1",
+            "province": "Ontario",
             "capacity": 123
         }
         c.post('/checkin/business/create_account/', data=data, content_type="application/json")
@@ -507,7 +528,10 @@ class BusinessAddUnregisteredVisitCreateTests(TestCase):
                 },
             "name": "business one",
             "phone_num": "1000000000",
-            "address": "1234 Street St.",
+            "street_address": "1234 Street St.",
+            "city": "City",
+            "postal_code": "E4X 2M1",
+            "province": "Ontario",
             "capacity": 123
         }
         c.post('/checkin/business/create_account/', data=data, content_type="application/json")
@@ -545,7 +569,9 @@ class VisitModelTests(TestCase):
         user1 = User.objects.create(email="user1@example.com", password="test")
         user11 = User.objects.create(email="business1@example.com", password="test")
         customer1 = Customer.objects.create(user=user1, first_name="Customer", last_name="One", phone_num=1000000000)
-        business1 = Business.objects.create(user=user11, name="Business One", phone_num=1000000000, address="1234 Street St.", capacity=123)
+        business1 = Business.objects.create(user=user11, name="Business One", phone_num=1000000000,
+                                            street_address="1234 Street St.", city="City", postal_code="E4X 2M1",
+                                            province="Ontario", capacity=123)
         Visit.objects.create(dateTime='2006-10-25 14:30:59', customer=customer1, business=business1, numVisitors=3)
 
     def test_to_string(self):
@@ -580,7 +606,10 @@ class VisitCreateViewTests(TestCase):
                 },
             "name": "business one",
             "phone_num": "1000000000",
-            "address": "1234 Street St.",
+            "street_address": "1234 Street St.",
+            "city": "City",
+            "postal_code": "E4X 2M1",
+            "province": "Ontario",
             "capacity": 123,
         }
         c.post('/checkin/business/create_account/', data=data, content_type="application/json")

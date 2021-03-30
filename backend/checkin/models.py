@@ -76,6 +76,10 @@ class Business(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE, primary_key=True)
     name = models.CharField(max_length=100)
     phone_num = models.CharField(max_length=11)
+    street_address = models.CharField(max_length=150)
+    city = models.CharField(max_length=100)
+    postal_code = models.CharField(max_length=7)
+    province = models.CharField(max_length=30)
     address = models.TextField()
     capacity = models.IntegerField()
 
