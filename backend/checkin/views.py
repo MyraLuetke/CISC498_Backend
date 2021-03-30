@@ -167,7 +167,7 @@ class ChangePassword(mixins.UpdateModelMixin, generics.GenericAPIView):
             # set_password also hashes the password that the user will get
             user.set_password(serializer.data.get("new_password"))
             user.save()
-            return Response(serializer.data, status=status.HTTP_200_OK)
+            return Response(status=status.HTTP_200_OK)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
