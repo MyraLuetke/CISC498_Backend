@@ -197,8 +197,9 @@ class VisitCreate(mixins.CreateModelMixin, APIView):
     def post(self, request, *args, **kwargs):
         serializer = VisitSerializer(data=request.data)
         if serializer.is_valid():
-            serializer.create(validated_data=request.data)
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
+            if serializer.validated_data['customer'].user.is_active and serializer.validated_data['business'].user.is_active:
+                serializer.create(validated_data=request.data)
+                return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.error_messages, status=status.HTTP_400_BAD_REQUEST)
 
 
