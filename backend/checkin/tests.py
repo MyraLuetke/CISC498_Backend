@@ -641,3 +641,111 @@ class VisitCreateViewTests(TestCase):
 
         response = c.post('/checkin/visit/create_visit/', HTTP_AUTHORIZATION='Bearer ' + self.access, data=data, content_type="application/json")
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
+
+class VisitListViewTests(TestCase):
+
+    def setUp(self):
+        c = Client()
+        data = {
+            "user":
+                {
+                    "email": "customer1@example.com",
+                    "password": "password"
+                },
+            "first_name": "Customer",
+            "last_name": "One",
+            "phone_num": "1111111111",
+            "contact_pref": 'P'
+        }
+        c.post('/checkin/customer/create_account/', data=data, content_type="application/json")
+
+        data = {
+            "user":
+                {
+                    "email": "customer2@example.com",
+                    "password": "password"
+                },
+            "first_name": "Customer",
+            "last_name": "Two",
+            "phone_num": "1111111111",
+            "contact_pref": 'E'
+        }
+        c.post('/checkin/customer/create_account/', data=data, content_type="application/json")
+
+        data = {
+            "user":
+                {
+                    "email": "business1@example.com",
+                    "password": "test"
+                },
+            "name": "business one",
+            "phone_num": "1000000000",
+            "street_address": "1234 Street St.",
+            "city": "City",
+            "postal_code": "E4X 2M1",
+            "province": "Ontario",
+            "capacity": 123,
+        }
+        c.post('/checkin/business/create_account/', data=data, content_type="application/json")
+
+        data = {
+            "user":
+                {
+                    "email": "business2@example.com",
+                    "password": "test"
+                },
+            "name": "business two",
+            "phone_num": "1000000000",
+            "street_address": "123 Street St.",
+            "city": "City",
+            "postal_code": "E4X 2M1",
+            "province": "Ontario",
+            "capacity": 120,
+        }
+        c.post('/checkin/business/create_account/', data=data, content_type="application/json")
+
+        data = {
+            "email": "customer2@example.com",
+            "password": "password"
+        }
+        response = c.post('/api/token/', data=data, content_type="application/json")
+        self.access = response.json()["access"]
+
+        data = {
+            "dateTime": "2021-03-24 20:30:23",
+            "customer": User.objects.get(email="customer2@example.com").id,
+            "business": User.objects.get(email="business2@example.com").id,
+            "numVisitors": "4"
+        }
+        response = c.post('/checkin/visit/create_visit/', HTTP_AUTHORIZATION='Bearer ' + self.access, data=data, content_type="application/json")
+
+        data = {
+            "email": "customer1@example.com",
+            "password": "password"
+        }
+        response = c.post('/api/token/', data=data, content_type="application/json")
+        self.access = response.json()["access"]
+
+        data = {
+            "dateTime": "2021-01-25 14:30:59",
+            "customer": User.objects.get(email="customer1@example.com").id,
+            "business": User.objects.get(email="business1@example.com").id,
+            "numVisitors": "6"
+        }
+        response = c.post('/checkin/visit/create_visit/', HTTP_AUTHORIZATION='Bearer ' + self.access, data=data, content_type="application/json")
+
+        data = {
+            "dateTime": "2021-03-24 20:30:23",
+            "customer": User.objects.get(email="customer1@example.com").id,
+            "business": User.objects.get(email="business2@example.com").id,
+            "numVisitors": "2"
+        }
+        response = c.post('/checkin/visit/create_visit/', HTTP_AUTHORIZATION='Bearer ' + self.access, data=data, content_type="application/json")
+
+    def test_visit_list_successful_get_request(self):
+        c = Client()
+
+        response = c.get("/checkin/visit/", HTTP_AUTHORIZATION='Bearer ' + self.access)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        print(response.content)

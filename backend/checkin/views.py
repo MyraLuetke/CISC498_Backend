@@ -225,11 +225,29 @@ class BusinessAddUnregisteredVisitCreate(mixins.CreateModelMixin, APIView):
         return Response(serializer.error_messages, status=status.HTTP_400_BAD_REQUEST)
 
 
-# TEMP: just for database viewing purposes. Can delete
-class VisitList(mixins.ListModelMixin, generics.GenericAPIView):
+class VisitList(generics.ListAPIView):
     permission_classes = (IsAuthenticated,)
-    queryset = Visit.objects.all()
     serializer_class = VisitSerializer
 
+    def get_queryset(self):
+        user = self.request.user.id
+        return Visit.objects.filter(customer=user)
+
     def get(self, request, *args, **kwargs):
-        return self.list(request, *args, **kwargs)
+        queryset = self.filter_queryset(self.get_queryset())
+
+        page = self.paginate_queryset(queryset)
+        if page is not None:
+            serializer = self.get_serializer(page, many=True)
+            return self.get_paginated_response(serializer.data)
+
+        serializer = self.get_serializer(queryset, many=True)
+        visits = []
+        for serializerVisit in serializer.data:
+            business = Business.objects.get(user__id=serializerVisit['business'])
+            responseVisit = {"dateTime": serializerVisit['dateTime'], "customer": serializerVisit['customer'], 
+                             "business_name": business.name, "business_street_address": business.street_address, 
+                             "business_city": business.city, "business_postal_code": business.postal_code, 
+                             "business_province": business.province, "business_phone_num": business.phone_num}
+            visits.append(responseVisit)
+        return Response(visits, status=status.HTTP_200_OK)
