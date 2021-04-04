@@ -248,6 +248,7 @@ class VisitList(generics.ListAPIView):
             responseVisit = {"dateTime": serializerVisit['dateTime'], "customer": serializerVisit['customer'], 
                              "business_name": business.name, "business_street_address": business.street_address, 
                              "business_city": business.city, "business_postal_code": business.postal_code, 
-                             "business_province": business.province, "business_phone_num": business.phone_num}
+                             "business_province": business.province, "business_phone_num": business.phone_num,
+                             "numVisitors": serializerVisit["numVisitors"]}
             visits.append(responseVisit)
         return Response(visits, status=status.HTTP_200_OK)
