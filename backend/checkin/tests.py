@@ -710,7 +710,7 @@ class VisitListViewTests(TestCase):
             "password": "password"
         }
         response = c.post('/api/token/', data=data, content_type="application/json")
-        self.access = response.json()["access"]
+        self.otheraccess = response.json()["access"]
 
         data = {
             "dateTime": "2021-03-24 20:30:23",
@@ -718,7 +718,7 @@ class VisitListViewTests(TestCase):
             "business": User.objects.get(email="business2@example.com").id,
             "numVisitors": "4"
         }
-        response = c.post('/checkin/visit/create_visit/', HTTP_AUTHORIZATION='Bearer ' + self.access, data=data, content_type="application/json")
+        response = c.post('/checkin/visit/create_visit/', HTTP_AUTHORIZATION='Bearer ' + self.otheraccess, data=data, content_type="application/json")
 
         data = {
             "email": "customer1@example.com",
@@ -748,4 +748,12 @@ class VisitListViewTests(TestCase):
 
         response = c.get("/checkin/visit/", HTTP_AUTHORIZATION='Bearer ' + self.access)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        print(response.content)
+        self.assertEqual(len(response.data), 2)
+        self.assertEqual(response.data[0]["customer"], User.objects.get(email="customer1@example.com").id)
+        self.assertEqual(response.data[1]["customer"], User.objects.get(email="customer1@example.com").id)
+
+    def test_visit_list_unauthorized_get_request(self):
+        c = Client()
+
+        response = c.get("/checkin/visit/", HTTP_AUTHORIZATION='Bearer ' + 'invalidaccess')
+        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
